@@ -30,19 +30,19 @@ v2rm <- c("play_id","old_game_id","season_type","game_half","quarter_end", "driv
           ,"drive_quarter_start","drive_quarter_end","drive_yards_penalized","drive_start_transition","drive_end_transition","drive_game_clock_start"
           ,"drive_game_clock_end","drive_play_id_started","drive_play_id_ended","game_stadium","first_down","aborted_play","passer_id","rusher_id","receiver_id","name"
           ,"id","qb_epa","xyac_epa","xyac_mean_yardage","xyac_median_yardage","xyac_success","xyac_fd", "order_sequence", "extra_point_result","td_team","total_home_score","total_away_score","posteam_score","defteam_score"
-          ,"score_differential","ep","epa","total_home_epa","total_away_epa","total_home_rush_epa","total_away_rush_epa","total_home_pass_epa"
+          ,"score_differential","weather","nfl_api_id","end_clock_time","drive_real_start_time","drive_time_of_possession","drive_first_downs","location","result"
+          ,"stadium_id","success","play", "play_type_nfl", "side_of_field", "drive_start_yard_line", "drive_end_yard_line", "end_yard_line", "rush_attempt", "pass_attempt",
+          ,"special_teams_play", "penalty_player_name", "home_coach", "away_coach", "passer", "rusher", "receiver", "series_success", "yrdln", "ydsnet"))
+          
+###### Added back for baseline model ########
+###### Looking through most of these for the baseline model, the NA could be handled with zeros. I can go through and add NA descriptions if needed! -MC 
+          "ep","epa","total_home_epa","total_away_epa","total_home_rush_epa","total_away_rush_epa","total_home_pass_epa"
           ,"total_away_pass_epa","air_epa","yac_epa","comp_air_epa","comp_yac_epa","total_home_comp_air_epa","total_away_comp_air_epa","total_home_comp_yac_epa"
           ,"total_away_comp_yac_epa","total_home_raw_air_epa","total_away_raw_air_epa","total_home_raw_yac_epa","total_away_raw_yac_epa","wp","def_wp"
           ,"home_wp","away_wp","wpa","home_wp_post","away_wp_post","vegas_wp","vegas_home_wp","total_home_rush_wpa","total_away_rush_wpa","total_home_pass_wpa"
           ,"total_away_pass_wpa","air_wpa","yac_wpa","comp_air_wpa","comp_yac_wpa","total_home_comp_air_wpa","total_away_comp_air_wpa","total_home_comp_yac_wpa"
           ,"total_away_comp_yac_wpa","total_home_raw_air_wpa","total_away_raw_air_wpa","total_home_raw_yac_wpa","total_away_raw_yac_wpa","first_down_rush"
-          ,"first_down_pass","order_sequence","weather","nfl_api_id","end_clock_time","drive_real_start_time","drive_play_count"
-          ,"drive_time_of_possession","drive_first_downs","away_score","home_score","location","result","total","spread_line","total_line"
-          ,"stadium_id","success","play", "play_type_nfl", "side_of_field", "drive_start_yard_line", "drive_end_yard_line", "end_yard_line", "rush_attempt", "pass_attempt",
-          "special_teams_play", "penalty_player_name", "home_coach", "away_coach", "passer", "rusher", "receiver", "series_success", "cp", "cpoe", "yrdln", "ydsnet",
-          "no_score_prob", "fg_prob")
-
-
+           ,"first_down_pass","no_score_prob", "fg_prob","drive_play_count","away_score","home_score","total_line","spread_line","total","cp", "cpoe"
 
 pdata <- pdata %>% select(-v2rm)
 
