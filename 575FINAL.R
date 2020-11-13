@@ -164,7 +164,7 @@ PRchiTst = PRchidata[-trnIndex,]
 #to include
 m1subset= select(PRchidata, -c("game_id", "home_team", "away_team", "sp", "field_goal_result", "rush", "play_type",
                              "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
-                             "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked",
+                             "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun", "yards_gained",
                              "temp", "time_of_day"))  # last 2 are gonna be in it once we fix them
 
 
@@ -225,11 +225,10 @@ rpModel2=rpart(drive_ended_with_score ~ ., data=m2subset, method= "class",
                parms = list(split = "information"), 
                control = rpart.control(minsplit = 30), na.action=na.omit)
 
-levels(pdata$drive_ended_with_score)
 
 # plotting the tree
 rpModel2$variable.importance
-rpart.plot::prp(rpModel2, type=2, extra=100)
+rpart.plot::prp(rpModel2, type=2, extra=100)                # look at why pos team is so important, make a note of it and remove it. then why is def team also and remove that
 
 # train and test accuracy??
 predTrn=predict(rpModel2, redchiTrn, type='class')
