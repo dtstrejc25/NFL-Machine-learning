@@ -207,4 +207,38 @@ mean(predict(rpModel1, PRchiTst, type='class') == PRchiTst$pass)
 #if you know another way of evaluating test/train accuracy please lmk i'm not sure if that above
 #code is actually saying anything 
 
+###################### model 2 ############################ RZ score y or no
+#test/train split
+TRG_PCT=0.7
+nr=nrow(chidataRED)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
 
+redchiTrn=chidataRED[trnIndex,]   #training data with the randomly selected row-indices
+redchiTst = chidataRED[-trnIndex, ]
+
+m2subset= select(chidataRED, -c("game_id", "home_team", "away_team", "sp", "field_goal_result", 
+                                 "special", "punt_attempt", "pass_touchdown", "rush_touchdown",
+                                 "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked",
+                                 "temp", "time_of_day"))  # last 2 are gonna be in it once we fix them
+
+rpModel2=rpart(drive_ended_with_score ~ ., data=m2subset, method= "class", 
+               parms = list(split = "information"), 
+               control = rpart.control(minsplit = 30), na.action=na.omit)
+
+levels(pdata$drive_ended_with_score)
+
+# plotting the tree
+rpModel2$variable.importance
+rpart.plot::prp(rpModel2, type=2, extra=100)
+
+# train and test accuracy??
+predTrn=predict(rpModel2, redchiTrn, type='class')
+table(pred = predTrn, true=redchiTrn$drive_ended_with_score)
+mean(predTrn == redchiTrn$drive_ended_with_score)
+table(pred = predict(rpModel1, redchiTst, type='class'), true=redchiTst$drive_ended_with_score)
+mean(predict(rpModel1, redchiTst, type='class') == redchiTst$drive_ended_with_score)
+
+#leakage-- these scores are probably too good- still need more revision and a closer look at what is in each model
+
+
+######################################### model 3 ############## punt or go for it ###############
