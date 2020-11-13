@@ -122,7 +122,10 @@ Rchidata <- chidata[grep("run", chidata$play_type), ]
 PRchidata <- rbind(Pchidata, Rchidata)
 dim(PRchidata)  #2020 x 42
 
-
+# in game prop of pass to rush- can change to play type so it says which is which---------------
+ggplot(chidata, aes(y = game_date)) +
+  geom_bar(aes(fill = pass), position = position_stack(reverse = TRUE)) + coord_flip() +
+  labs(title = "Proportion of rush to pass Chicago Bears 2019 Season") + theme_bw()
 
 ggplot(chidata[!is.na(chidata$play_type),], aes( x = play_type)) + geom_bar(fill="lightblue") + 
   labs(title = "Play Types for Chicago Bears 2019") + theme_bw()
