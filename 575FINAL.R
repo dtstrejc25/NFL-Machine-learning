@@ -79,11 +79,13 @@ library(lubridate)
 pdata$game_date <- parse_date_time(pdata$game_date, "%x") #error but still works
 str(pdata$game_date)
 
-#can't get this one to work
+#Start time to time format
 pdata$start_time <- str_remove(pdata$start_time, "1899-12-31")
 summary(pdata$start_time)
-pdata$start_time<-parse_date(pdata$start_time,  format = "%H:%M:%S")
 
+pdata$start_time <- c(as.numeric(pdata$start_time))
+pdata$start_time <- format(as.POSIXct((pdata$start_time) * 86400, origin = "1970-01-01", tz = "UTC"), "%H:%M:%S")
+table(pdata$start_time)
 
 # make chicago df
 chidata <- pdata[grep("CHI", pdata$game_id), ]
