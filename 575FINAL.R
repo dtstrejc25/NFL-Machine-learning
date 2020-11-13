@@ -123,12 +123,9 @@ PRchidata <- rbind(Pchidata, Rchidata)
 dim(PRchidata)  #2020 x 42
 
 # in game prop of pass to rush- can change to play type so it says which is which---------------
-ggd <- chidata %>% filter(chidata$play_type == "run" | chidata$play_type == "pass") %>% droplevels()
-
-ggplot(ggd, aes(y = game_date)) +
-  geom_bar(aes(fill = play_type), position = position_stack(reverse = TRUE)) + coord_flip() +
-  labs(title = "Proportion of rush to pass Chicago Bears 2019 Season") + theme_bw() +
-  scale_fill_discrete(labels= c("Pass", "Run"))
+ggplot(chidata, aes(y = game_date)) +
+  geom_bar(aes(fill = pass), position = position_stack(reverse = TRUE)) + coord_flip() +
+  labs(title = "Proportion of rush to pass Chicago Bears 2019 Season") + theme_bw()
 
 ggplot(chidata[!is.na(chidata$play_type),], aes( x = play_type)) + geom_bar(fill="lightblue") + 
   labs(title = "Play Types for Chicago Bears 2019") + theme_bw()
@@ -136,6 +133,40 @@ ggplot(chidata[!is.na(chidata$play_type),], aes( x = play_type)) + geom_bar(fill
 
 ggplot(chidata, aes(x = game_date)) + geom_bar(fill="lightblue", ) + 
   labs(title = "Chicago Bears- Plays per game") + theme_bw() #+
+
+#All Plays for Chicago graph
+all_Chi_Play <- chidata %>% filter(chidata$play_type != "NA") %>%
+  droplevels()
+table(all_Chi_Play$play_type)
+ggplot(all_Chi_Play, aes(x = play_type), position = position_stack(reverse = TRUE)) + 
+  coord_flip() + geom_bar(fill="lightblue") + 
+  labs(title = "Play Types for Chicago Bears 2019") + theme_bw()
+
+#Rush vs. Pass for Chicago table and Graph
+PRchidata <- chidata %>% filter(chidata$play_type == "run" | chidata$play_type == "pass") %>%
+  droplevels()
+table(PRchidata$play_type)
+Chi_table<- table(PRchidata$game_date, PRchidata$play_type)
+kable(Chi_table, "simple", align = "c")
+
+#Graph with count for all games
+ggplot(PRchidata, aes(x = play_type), position = position_stack(reverse = TRUE))+
+  coord_flip()+geom_bar(stat = "identity")+
+  labs(title = "Chicago Bears Pass vs. Rush for each Game", x = "Game", y = "Count of Plays")+ 
+  scale_fill_discrete(labels = c("Pass", "Run"))+ theme(axis.text.x = element_text(angle = 45))+ theme_bw()
+
+#Table for Division Rush vs. Pass
+PRdivdata <- divdata %>% filter(divdata$play_type == "run" | divdata$play_type == "pass") %>%
+  droplevels()
+table(PRdivdata$play_type)
+Div_table<- table(PRdivdata$game_date, PRdivdata$play_type)
+kable(Div_table, "simple", align = "c")
+
+#Division Bar Graph
+ggplot(PRdivdata, aes(x = game_date, y = play_type, fill = play_type), position = position_stack(reverse = TRUE))+coord_flip()+
+  geom_bar(stat = "identity")+labs(title = "NFC North Pass vs. Rush for each Game", x = "Game", y = "Count of Plays")+ 
+  scale_fill_discrete(labels = c("Pass", "Run"))+ theme_bw()+theme(axis.text.y = element_text(angle = 90))
+
 
 
 #this is what will rotate your text~ 
@@ -155,7 +186,11 @@ chidata %>%
 PRchidata$pass <- ifelse(PRchidata$pass==1,1,0)
 PRchidata$pass <- as.factor(PRchidata$pass)
 
+#Time of day code
+divTime <- c(divdata$time_of_day) #need to get rid of #NA
+divTime
 
+format(as.POSIXct((divTime) * 86400, origin = "1970-01-01", tz = "UTC"), "%H:%M")
 
 #test/train split
 TRG_PCT=0.7
