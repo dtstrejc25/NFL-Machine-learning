@@ -35,7 +35,7 @@ v2rm <- c("play_id","old_game_id","season_type","game_half","quarter_end", "driv
           ,"special_teams_play", "penalty_player_name", "home_coach", "away_coach", "passer", "rusher", "receiver", "series_success", "yrdln", "ydsnet"))
           
 ###### Added back for baseline model ########
-###### Looking through most of these for the baseline model, the NA could be handled with zeros. I can go through and add NA descriptions if needed! -MC 
+###### Looking through most of these for the baseline model, the NA could be handled with zeros. I can go through and add what we should do with NA descriptions if needed! -MC 
           "ep","epa","total_home_epa","total_away_epa","total_home_rush_epa","total_away_rush_epa","total_home_pass_epa"
           ,"total_away_pass_epa","air_epa","yac_epa","comp_air_epa","comp_yac_epa","total_home_comp_air_epa","total_away_comp_air_epa","total_home_comp_yac_epa"
           ,"total_away_comp_yac_epa","total_home_raw_air_epa","total_away_raw_air_epa","total_home_raw_yac_epa","total_away_raw_yac_epa","wp","def_wp"
