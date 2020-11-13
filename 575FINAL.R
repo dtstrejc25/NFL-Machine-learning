@@ -162,7 +162,7 @@ PRchiTst = PRchidata[-trnIndex,]
 
 ## model 1 ##
 #to include
-m1subset= select(PRchidata, -c("game_id", "home_team", "away_team", "sp", "field_goal_result", "rush", "pass",
+m1subset= select(PRchidata, -c("game_id", "home_team", "away_team", "sp", "field_goal_result", "rush", "play_type",
                              "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
                              "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked",
                              "temp", "time_of_day"))  # last 2 are gonna be in it once we fix them
@@ -171,7 +171,7 @@ m1subset= select(PRchidata, -c("game_id", "home_team", "away_team", "sp", "field
 
 library(ranger)
 # get the sheet and do the model with that
-rpModel1=rpart(play_type ~ ., data=m1subset, method= "class", 
+rpModel1=rpart(pass ~ ., data=m1subset, method= "class", 
                parms = list(split = "information"), 
                control = rpart.control(minsplit = 30), na.action=na.omit)
 
