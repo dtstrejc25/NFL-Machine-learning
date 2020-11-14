@@ -218,7 +218,7 @@ PRchiTst = PRchidata[-trnIndex,]
 m1subset= select(PRchidata, -c("game_id", "home_team", "away_team", "sp", "field_goal_result", "rush", "play_type",
                              "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
                              "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun", "yards_gained",
-                             "temp", "time_of_day"))  # last 2 are gonna be in it once we fix them
+                             "temp", "start_time"))   # last 2 are gonna be in it once we fix them
 
 
 
