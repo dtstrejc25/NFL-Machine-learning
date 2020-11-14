@@ -87,6 +87,15 @@ pdata$start_time <- c(as.numeric(pdata$start_time))
 pdata$start_time <- format(as.POSIXct((pdata$start_time) * 86400, origin = "1970-01-01", tz = "UTC"), "%H:%M:%S")
 table(pdata$start_time)
 
+start_group <- ifelse(pdata$start_time == "09:29:59" | pdata$start_time == "12:29:59" | pdata$start_time == "13:00:00" | pdata$start_time == "13:05:00",  "First Slate", 
+               ifelse(pdata$start_time == "15:04:59" | pdata$start_time == "16:05:00" | pdata$start_time == "16:25:00" | pdata$start_time == "16:30:00" | pdata$start_time == "16:34:59" | pdata$start_time == "16:40:00", "Second Slate",
+               ifelse(pdata$start_time == "18:29:59" | pdata$start_time == "18:40:00" | pdata$start_time == "19:10:00" | pdata$start_time == "20:15:00" | pdata$start_time == "20:19:59" | pdata$start_time == "22:19:59", "Prime Time", "NA")))     
+
+table(start_group)
+pdata <- cbind(pdata, start_group)
+pdata$start_group
+
+
 # make chicago df
 chidata <- pdata[grep("CHI", pdata$game_id), ]
 head(chidata)
