@@ -93,7 +93,8 @@ start_group <- ifelse(pdata$start_time == "09:29:59" | pdata$start_time == "12:2
 
 table(start_group)
 pdata <- cbind(pdata, start_group)
-pdata$start_group
+pdata$start_group <- as.factor(pdata$start_group)
+levels(pdata$start_group)
 
 
 # make chicago df
