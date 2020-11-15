@@ -203,7 +203,7 @@ redchiTst = chidataRED[-trnIndex, ]
 m2subset= select(redchiTrn, -c("game_id", "home_team", "away_team", "sp", "field_goal_result", 
                                 "special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
                                 "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked",
-                                "temp", "start_time"))  # last 2 are gonna be in it once we fix them
+                                "start_time"))  
 
 rpModel2=rpart(drive_ended_with_score ~ ., data=m2subset, method= "class", 
                parms = list(split = "information"), 
@@ -222,6 +222,8 @@ mean(predict(rpModel2, redchiTst, type='class') == redchiTst$drive_ended_with_sc
 
 
 ######################################### model 3 ############## punt or go for it ###############
+
+################################ DON'T USE THIS ONE #######################
 # dataset with down = 4
 chi4th$posteam
 cc <- which(chidata$down == 4)
@@ -280,9 +282,10 @@ FGtrn=FGdata[trnIndex,]   #training data with the randomly selected row-indices
 FGtst = FGdata[-trnIndex, ]
 
 m4subset= select(FGtrn, -c("game_id", "home_team", "away_team", "sp", "drive_ended_with_score", "posteam_score", "defteam_score",
-                            "special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
-                            "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "drive_inside20", "goal_to_go",
-                            "temp", "start_time"))  # last 2 are gonna be in it once we fix them
+                           "special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
+                           "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "drive_inside20", "goal_to_go",
+                           "start_time", "game_date"))  # last 2 are gonna be in it once we fix them
+
 
 
 rpModel4=rpart(field_goal_result ~ ., data=m4subset, method= "class", 
