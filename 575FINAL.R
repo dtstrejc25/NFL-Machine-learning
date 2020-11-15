@@ -96,43 +96,15 @@ pdata <- cbind(pdata, start_group)
 pdata$start_group <- as.factor(pdata$start_group)
 levels(pdata$start_group)
 
-
 # make chicago df
-chidata <- pdata[grep("CHI", pdata$game_id), ]
+chidata <- pdata[grep("CHI", pdata$posteam), ]
 head(chidata)
 
 #for outcome 2--- make new df w just that in the redzone
 chid <- which(chidata$drive_inside20==1)
 chidataRED <- chidata[chid, ]
 chidataRED$drive_ended_with_score <- na.omit(chidataRED$drive_ended_with_score)
-summary(chidataRED$drive_ended_with_score)
-
-
-
-
-#include the 3 teams also in the the conference-MIN,DET,GB
-
-gbdata <- pdata[grep("GB", pdata$game_id), ]
-head(gbdata)
-
-dtdata <- pdata[grep("DET", pdata$game_id), ]
-head(dtdata)
-
-mndata <- pdata[grep("MIN", pdata$game_id), ]
-head(mndata)
-
-divdata <- rbind(gbdata, dtdata, mndata, chidata)
-dim(divdata)   #11116 x 42
-
-#so our dataframes are pdata, chidata, divdata
-
-# make pass vs rush split so only include rows where these two happened
-##########  outcome 1:: pass vs run ###################
-
-Pchidata <- chidata[grep("pass", chidata$play_type), ]
-Rchidata <- chidata[grep("run", chidata$play_type), ]
-PRchidata <- rbind(Pchidata, Rchidata)
-dim(PRchidata)  #2020 x 42
+summary(chidataRED$drive_ended_with_score)  #label imbalance
 
 # in game prop of pass to rush- can change to play type so it says which is which---------------
 ggplot(chidata, aes(y = game_date)) +
@@ -181,29 +153,6 @@ ggplot(PRdivdata, aes(x = game_date, y = play_type, fill = play_type), position 
 
 
 
-#this is what will rotate your text~ 
-# + theme(axis.text.x = element_text(angle = 45))
-# 
-# + theme_bw()   # add this too if you're doing ggplot!!!!! presentation quality haha
-
-chidata %>% 
-  filter(down == 4 & punt_attemmpt == 0) %>% select(ydstogo) %>% head()
-
-
-
-
-# now we can analyze pass vs rush
-
-
-PRchidata$pass <- ifelse(PRchidata$pass==1,1,0)
-PRchidata$pass <- as.factor(PRchidata$pass)
-
-#Time of day code
-divTime <- c(divdata$time_of_day) #need to get rid of #NA
-divTime
-
-format(as.POSIXct((divTime) * 86400, origin = "1970-01-01", tz = "UTC"), "%H:%M")
-
 #test/train split
 TRG_PCT=0.7
 nr=nrow(PRchidata)
@@ -216,10 +165,9 @@ PRchiTst = PRchidata[-trnIndex,]
 ## model 1 ##
 #to include
 m1subset= select(PRchiTrn, -c("game_id", "home_team", "away_team", "sp", "field_goal_result", "rush", "play_type",
-                             "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
-                             "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun", "yards_gained",
-                             "temp", "start_time"))   # last 2 are gonna be in it once we fix them
-
+                               "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun", "yards_gained",
+                               "temp", "start_time"))  # temp gonna be in it once we fix 
 
 
 library(ranger)
@@ -239,29 +187,11 @@ mean(predTrn == PRchiTrn$pass)
 table(pred = predict(rpModel1, PRchiTst, type='class'), true=PRchiTst$pass)
 mean(predict(rpModel1, PRchiTst, type='class') == PRchiTst$pass)
 
-# JUST DO AUC FOR THIS PRELIMINARY ASSIGNMENT- LATER WE'LL DO ROC AND OTHER EVAL METRICS
 
-# library(pROC)
-# PRchiTst$play_type <- na.omit(PRchiTst$play_type)
-# PRchiTrn_p<- predict(rpModel1, PRchiTrn)
-# PRchiTst_p<- predict(rpModel1, PRchiTst)
-# 
-# rocTrn <- roc(PRchiTrn$play_type, PRchiTrn_p[,2], levels=c(0, 1))
-# rocTst <- roc(PRchiTst$play_type, PRchiTst_p[,2], levels=c(0, 1))
-# 
-# plot.roc(rocTrn, col='blue', legacy.axes = TRUE)
-# plot.roc(rocTst, col='red', add=TRUE)
-# legend("bottomright", legend=c("Training", "Test"),
-#        col=c("blue", "red"), lwd=2, cex=0.8, bty='n')
-# 
-# 
-# plot.roc(rpModel1, )
 
-#if you know another way of evaluating test/train accuracy please lmk i'm not sure if that above
-#code is actually saying anything 
 
 ###################### model 2 ############################ RZ score y or no
-#test/train split
+#test/train split--- 1052 rows- is this enough?
 TRG_PCT=0.7
 nr=nrow(chidataRED)
 trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
@@ -270,36 +200,67 @@ redchiTrn=chidataRED[trnIndex,]   #training data with the randomly selected row-
 redchiTst = chidataRED[-trnIndex, ]
 
 m2subset= select(redchiTrn, -c("game_id", "home_team", "away_team", "sp", "field_goal_result", 
-                                 "special", "punt_attempt", "pass_touchdown", "rush_touchdown",
-                                 "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked",
-                                 "temp", "time_of_day"))  # last 2 are gonna be in it once we fix them
+                                "special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
+                                "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked",
+                                "temp", "start_time"))  # last 2 are gonna be in it once we fix them
 
 rpModel2=rpart(drive_ended_with_score ~ ., data=m2subset, method= "class", 
                parms = list(split = "information"), 
                control = rpart.control(minsplit = 30), na.action=na.omit)
 
-
 # plotting the tree
 rpModel2$variable.importance
-rpart.plot::prp(rpModel2, type=2, extra=100)                # look at why pos team is so important, make a note of it and remove it. then why is def team also and remove that
+rpart.plot::prp(rpModel2, type=2, extra=100)
 
 # train and test accuracy??
 predTrn=predict(rpModel2, redchiTrn, type='class')
 table(pred = predTrn, true=redchiTrn$drive_ended_with_score)
 mean(predTrn == redchiTrn$drive_ended_with_score)
-table(pred = predict(rpModel1, redchiTst, type='class'), true=redchiTst$drive_ended_with_score)
-mean(predict(rpModel1, redchiTst, type='class') == redchiTst$drive_ended_with_score)
-
-#leakage-- these scores are probably too good- still need more revision and a closer look at what is in each model
+table(pred = predict(rpModel2, redchiTst, type='class'), true=redchiTst$drive_ended_with_score)
+mean(predict(rpModel2, redchiTst, type='class') == redchiTst$drive_ended_with_score)
 
 
 ######################################### model 3 ############## punt or go for it ###############
+# dataset with down = 4
+chi4th$posteam
+cc <- which(chidata$down == 4)
+chi4th <- chidata[cc, ]
+cc <- which(chi4th$posteam == "CHI")
+chi4th <- chidata[cc, ]
+
+chi4th$posteam 
+# #only 130 if just the bears on offense
+# 
+# cc <- which(divdata$down == 4)
+# div4th <- divdata[cc, ]     #1033 with division
 
 
+TRG_PCT=0.8
+nr=nrow(chi4th)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
 
+c4trn=chi4th[trnIndex,]   #training data with the randomly selected row-indices
+c4tst = chi4th[-trnIndex, ]
 
+m3subset= select(c4trn, -c("game_id", "home_team", "away_team", "sp", "drive_ended_with_score", "posteam_score", "defteam_score", "play_type",
+                            "special", "pass_touchdown", "rush_touchdown", "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "drive_inside20", "goal_to_go",
+                            "temp", "start_time", "shotgun", "pass", "rush", "yards_gained", "field_goal_result", "down", "ydstogo"))
 
+summary(m3subset$punt_attempt)
+rpModel3=rpart(punt_attempt ~ ., data=m3subset, method= "class", 
+               parms = list(split = "information"), 
+               control = rpart.control(minsplit = 30), na.action=na.omit)
 
+# plotting the tree
+rpModel3$variable.importance
+rpart.plot::prp(rpModel3, type=2, extra=100)
+
+# train and test accuracy??
+predTrn=predict(rpModel4, FGtrn, type='class')
+table(pred = predTrn, true=FGtrn$field_goal_result)
+mean(predTrn == FGtrn$field_goal_result)
+table(pred = predict(rpModel2, FGtst, type='class'), true=FGtst$field_goal_result)
+mean(predict(rpModel4, FGtst, type='class') == FGtst$field_goal_result)
 
 
 
@@ -338,4 +299,3 @@ table(pred = predTrn, true=FGtrn$field_goal_result)
 mean(predTrn == FGtrn$field_goal_result)
 table(pred = predict(rpModel2, FGtst, type='class'), true=FGtst$field_goal_result)
 mean(predict(rpModel4, FGtst, type='class') == FGtst$field_goal_result)
-
