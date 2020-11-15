@@ -209,7 +209,7 @@ mean(predict(rpModel1, PRchiTst, type='class') == PRchiTst$pass)
 
 ###################### model 2 ############################ RZ score y or no
 #test/train split--- 488 rows- is this enough?
-TRG_PCT=0.7
+TRG_PCT=0.8
 nr=nrow(chidataRED)
 trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
 
