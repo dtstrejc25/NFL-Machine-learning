@@ -44,17 +44,27 @@ v2rm <- c("play_id","old_game_id","season_type","game_half","quarter_end", "driv
           ,"total_away_comp_yac_wpa","total_home_raw_air_wpa","total_away_raw_air_wpa","total_home_raw_yac_wpa","total_away_raw_yac_wpa","first_down_rush"
            ,"first_down_pass","no_score_prob", "fg_prob","drive_play_count","away_score","home_score","total_line","spread_line","total","cp", "cpoe"
 
+############## Adding back for baseline model all NA's to zero ###################
+pdata <- pdata %>% replace_na(list((ep = 0), (epa = 0), (total_home_epa = 0), (total_away_epa = 0), (total_home_rush_epa = 0),
+      (total_away_rush_epa = 0), (total_home_pass_epa = 0), (total_away_pass_epa = 0), (air_epa = 0), (yac_epa = 0), (comp_air_epa = 0),
+      (comp_yac_epa = 0), (total_home_comp_air_epa = 0), (total_away_comp_air_epa = 0), (total_home_comp_yac_epa = 0), (total_away_comp_yac_epa = 0),
+      (total_home_raw_air_epa = 0), (total_away_raw_air_epa = 0), (total_home_raw_yac_epa = 0), (total_away_raw_yac_epa = 0), (wp = 0), (def_wp = 0),
+      (home_wp = 0), (away_wp = 0), (wpa = 0), (home_wp_post = 0), (away_wp_post = 0), (vegas_wp = 0), (vegas_home_wp = 0), (total_home_rush_wpa = 0)(total_away_rush_wpa = 0)(total_home_pass_wpa = 0),
+      (total_away_pass_wpa = 0), (air_wpa = 0), (yac_wpa = 0), (comp_air_wpa = 0), (comp_yac_wpa = 0), (total_home_comp_air_wpa = 0), (total_away_comp_air_wpa = 0),
+      (total_home_comp_yac_wpa = 0), (total_away_comp_yac_wpa = 0), (total_home_raw_air_wpa = 0), (total_away_raw_air_wpa = 0), (total_home_raw_yac_wpa = 0),
+      (total_away_raw_yac_wpa = 0), (first_down_rush = 0), (first_down_pass = 0), (no_score_prob = 0), (fg_prob = 0), (drive_play_count = 0), (away_score = 0),
+      (home_score = 0), (total_line = 0), (spread_line = 0), (total = 0)(cp = 0), (cpoe = 0)))
+
+############## Update columns for inside games wind/temperature (65 set to average inside stadium temperature ################
+pdata <- pdata %>% replace_na(list(temp=65, na.rm=true))
+pdata<- pdata %>% replace_na(list(wind=0, na.rm=TRUE))
+
 pdata <- pdata %>% select(-v2rm)
 
 
 # model 1 - pass or run
 #model 2 - redzone score or not
 # model 3 - punt on down 4 or go for it
-
-
-pdata<- pdata %>% replace_na(list(wind=0, na.rm=TRUE))
-# what to do for temperature??
-
 
 pdata <- pdata %>% filter(posteam !="NA")
 
