@@ -106,6 +106,18 @@ chidataRED <- chidata[chid, ]
 chidataRED$drive_ended_with_score <- na.omit(chidataRED$drive_ended_with_score)
 summary(chidataRED$drive_ended_with_score)  #label imbalance
 
+gbdata <- pdata[grep("GB", pdata$posteam), ]
+head(gbdata)
+
+dtdata <- pdata[grep("DET", pdata$posteam), ]
+head(dtdata)
+
+mndata <- pdata[grep("MIN", pdata$posteam), ]
+head(mndata)
+
+divdata <- rbind(gbdata, dtdata, mndata, chidata)
+dim(divdata) 
+
 # in game prop of pass to rush- can change to play type so it says which is which---------------
 ggplot(chidata, aes(y = game_date)) +
   geom_bar(aes(fill = pass), position = position_stack(reverse = TRUE)) + coord_flip() +
@@ -151,7 +163,11 @@ ggplot(PRdivdata, aes(x = game_date, y = play_type, fill = play_type), position 
   geom_bar(stat = "identity")+labs(title = "NFC North Pass vs. Rush for each Game", x = "Game", y = "Count of Plays")+ 
   scale_fill_discrete(labels = c("Pass", "Run"))+ theme_bw()+theme(axis.text.y = element_text(angle = 90))
 
-
+##################################################################
+Pchidata <- chidata[grep("pass", chidata$play_type), ]
+Rchidata <- chidata[grep("run", chidata$play_type), ]
+PRchidata <- rbind(Pchidata, Rchidata)
+dim(PRchidata)
 
 #test/train split
 TRG_PCT=0.7
@@ -192,7 +208,7 @@ mean(predict(rpModel1, PRchiTst, type='class') == PRchiTst$pass)
 
 
 ###################### model 2 ############################ RZ score y or no
-#test/train split--- 1052 rows- is this enough?
+#test/train split--- 488 rows- is this enough?
 TRG_PCT=0.7
 nr=nrow(chidataRED)
 trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
@@ -271,8 +287,10 @@ mean(predict(rpModel4, FGtst, type='class') == FGtst$field_goal_result)
 ########################  FG model ###########################
 #### predict if a FG was made ####
 
-FGdata <- FGdata %>% filter(FGdata$field_goal_result == "made" | FGdata$field_goal_result == "missed") %>% droplevels()
+#############  FG with the whole league -- otherwise it's too small 
 
+FGdata <- pdata %>% filter(pdata$field_goal_result == "made" | pdata$field_goal_result == "missed") %>% droplevels()
+#999
 
 TRG_PCT=0.7
 nr=nrow(FGdata)
@@ -285,7 +303,6 @@ m4subset= select(FGtrn, -c("game_id", "home_team", "away_team", "sp", "drive_end
                            "special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
                            "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "drive_inside20", "goal_to_go",
                            "start_time", "game_date"))  # last 2 are gonna be in it once we fix them
-
 
 
 rpModel4=rpart(field_goal_result ~ ., data=m4subset, method= "class", 
@@ -303,3 +320,4 @@ table(pred = predTrn, true=FGtrn$field_goal_result)
 mean(predTrn == FGtrn$field_goal_result)
 table(pred = predict(rpModel2, FGtst, type='class'), true=FGtst$field_goal_result)
 mean(predict(rpModel4, FGtst, type='class') == FGtst$field_goal_result)
+
