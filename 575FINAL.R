@@ -294,3 +294,48 @@ mean(predict(rpModel1, redchiTst, type='class') == redchiTst$drive_ended_with_sc
 
 
 ######################################### model 3 ############## punt or go for it ###############
+
+
+
+
+
+
+
+
+
+
+########################  FG model ###########################
+#### predict if a FG was made ####
+
+FGdata <- FGdata %>% filter(FGdata$field_goal_result == "made" | FGdata$field_goal_result == "missed") %>% droplevels()
+
+
+TRG_PCT=0.7
+nr=nrow(FGdata)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+FGtrn=FGdata[trnIndex,]   #training data with the randomly selected row-indices
+FGtst = FGdata[-trnIndex, ]
+
+m4subset= select(FGdata, -c("game_id", "home_team", "away_team", "sp", "drive_ended_with_score", "posteam_score", "defteam_score",
+                            "special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
+                            "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "drive_inside20", "goal_to_go",
+                            "temp", "start_time"))  # last 2 are gonna be in it once we fix them
+
+
+rpModel4=rpart(field_goal_result ~ ., data=m4subset, method= "class", 
+               parms = list(split = "information"), 
+               control = rpart.control(minsplit = 30), na.action=na.omit)
+
+
+# plotting the tree
+rpModel4$variable.importance
+rpart.plot::prp(rpModel4, type=2, extra=100)
+
+# train and test accuracy??
+predTrn=predict(rpModel4, FGtrn, type='class')
+table(pred = predTrn, true=FGtrn$field_goal_result)
+mean(predTrn == FGtrn$field_goal_result)
+table(pred = predict(rpModel2, FGtst, type='class'), true=FGtst$field_goal_result)
+mean(predict(rpModel4, FGtst, type='class') == FGtst$field_goal_result)
+
