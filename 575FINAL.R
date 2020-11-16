@@ -338,9 +338,9 @@ FGtrn=FGdata[trnIndex,]   #training data with the randomly selected row-indices
 FGtst = FGdata[-trnIndex, ]
 
 m4subset= select(FGtrn, -c("game_id", "home_team", "away_team", "sp", "drive_ended_with_score", "posteam_score", "defteam_score",
-                           "special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
+                           "special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam", "play_type",
                            "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "drive_inside20", "goal_to_go",
-                           "start_time", "game_date"))  # last 2 are gonna be in it once we fix them
+                           "start_time", "game_date"))  
 
 
 rpModel4=rpart(field_goal_result ~ ., data=m4subset, method= "class", 
