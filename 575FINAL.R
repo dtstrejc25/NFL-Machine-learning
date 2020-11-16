@@ -456,3 +456,49 @@ ggplot(PRdldata, aes(x = play_type), position = position_stack(reverse = TRUE))+
   coord_flip()+geom_bar(stat = "identity")+
   labs(title = "Detroit Lions Pass vs. Rush for each Game", x = "Game", y = "Count of Plays")+ 
   scale_fill_discrete(labels = c("Pass", "Run"))+ theme(axis.text.x = element_text(angle = 45))+ theme_bw()
+
+########################################################################################################
+########################################## Baseline ####################################################
+#Rush vs. Pass for Chicago table and Graph
+PRchidataBL <- chidata %>% filter(chidata$play_type == "run" | chidata$play_type == "pass") %>%
+  droplevels()
+table(PRchidata$play_type)
+Chi_table<- table(PRchidata$game_date, PRchidata$play_type)
+table(Chi_table, "simple", align = "c")
+
+#test/train split
+TRG_PCT=0.7
+nr=nrow(PRchidata)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+PRchiTrnBL = PRchidataBL[trnIndex,]   #training data with the randomly selected row-indices
+PRchiTstBL = PRchidataBL[-trnIndex,]
+
+
+## model 1 ##
+#to include
+BLsubset = select(PRchiTrnBL, -c("game_id", "home_team", "away_team", "sp", "field_goal_result", "rush", "play_type",
+                                 "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
+                                 "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun", "yards_gained",
+                                 "temp", "start_time", "ep","epa","total_home_epa","total_away_epa","total_home_rush_epa","total_away_rush_epa","total_home_pass_epa"
+                                 ,"total_away_pass_epa","air_epa","yac_epa","comp_air_epa","comp_yac_epa","total_home_comp_air_epa","total_away_comp_air_epa","total_home_comp_yac_epa"
+                                 ,"total_away_comp_yac_epa","total_home_raw_air_epa","total_away_raw_air_epa","total_home_raw_yac_epa","total_away_raw_yac_epa","wp","def_wp"
+                                 ,"home_wp","away_wp","wpa","home_wp_post","away_wp_post","vegas_wp","vegas_home_wp","total_home_rush_wpa","total_away_rush_wpa","total_home_pass_wpa"
+                                 ,"total_away_pass_wpa","air_wpa","yac_wpa","comp_air_wpa","comp_yac_wpa","total_home_comp_air_wpa","total_away_comp_air_wpa","total_home_comp_yac_wpa"
+                                 ,"total_away_comp_yac_wpa","total_home_raw_air_wpa","total_away_raw_air_wpa","total_home_raw_yac_wpa","total_away_raw_yac_wpa","first_down_rush"
+                                 ,"first_down_pass","no_score_prob", "fg_prob","drive_play_count","away_score","home_score","total_line","spread_line","total","cp", "cpoe"))
+
+rpModelBL=rpart(pass ~ .e ~ ., data=BLsubset, method= "class", 
+                parms = list(split = "information"), 
+                control = rpart.control(minsplit = 30), na.action=na.omit)
+
+# plotting the tree
+rpModelBL$variable.importance
+rpart.plot::prp(rpModelBL, type=2, extra=100)
+
+# train and test accuracy 
+predTrn=predict(rpModelBL, PRchiTrnBL, type='class')
+table(pred = predTrn, true=PRchiTrnBL$pass)
+mean(predTrn == PRchiTrnBL$pass)
+table(pred = predict(rpModelBL, PRchiTstBL, type='class'), true=PRchiTstBL$pass)
+mean(predict(rpModelBL, PRchiTstBL, type='class') == PRchiTstBL$pass)
