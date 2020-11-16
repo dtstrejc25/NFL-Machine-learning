@@ -477,7 +477,7 @@ PRchiTstBL = PRchidataBL[-trnIndex,]
 
 ## model 1 ##
 #to include
-BLsubset = select(PRchiTrnBL, -c("game_id", "home_team", "away_team", "sp", "field_goal_result", "rush", "play_type",
+BLsubset = select(PRchiTrnBL, c("game_id", "home_team", "away_team", "sp", "field_goal_result", "rush", "play_type",
                                  "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
                                  "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun", "yards_gained",
                                  "temp", "start_time", "ep","epa","total_home_epa","total_away_epa","total_home_rush_epa","total_away_rush_epa","total_home_pass_epa"
