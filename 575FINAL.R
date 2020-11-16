@@ -226,10 +226,11 @@ step(null_model, scope = list(lower = null_model, upper = full_model), direction
 mod1_glm <- glm(pass ~ down + ydstogo + no_huddle + half_seconds_remaining, family = "binomial", data = m1subset)
 
 #Test Accuracy
-pred <- predict(mod1_glm, newdata = PRchiTrn)
+PRchiTst <- PRchiTst %>% filter(down !="NA")
+pred <- predict(mod1_glm, newdata = PRchiTst)
 pred_class <- as.factor(ifelse(pred >= 0.5, "1", "0"))
 library(caret)
-confusionMatrix(pred_class, PRchiTrn$pass)
+confusionMatrix(pred_class, PRchiTst$pass)
 
 ##################### model 2 ############################ RZ score y or no
 #test/train split--- 488 rows- is this enough?
@@ -276,10 +277,10 @@ step(null_model2, scope = list(lower = null_model2, upper = full_model2), direct
 #mod2_glm <- glm(pass ~ down + ydstogo + no_huddle + half_seconds_remaining, family = "binomial", data = m1subset) #Not optimal and error with step
 
 #Test Accuracy 
-pred2 <- predict(mod2_glm, newdata = redchiTrn)
+pred2 <- predict(mod2_glm, newdata = redchiTst)
 pred_class2 <- as.factor(ifelse(pred2 >= 0.5, "1", "0"))
 library(caret)
-confusionMatrix(pred_class2, redchiTrn$drive_ended_with_score)
+confusionMatrix(pred_class2, redchiTst$drive_ended_with_score)
 
 
 
