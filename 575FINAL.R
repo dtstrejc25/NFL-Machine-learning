@@ -276,48 +276,46 @@ confusionMatrix(pred_class2, redchiTrn$drive_ended_with_score)
 
 
 ######################################### model 3 ############## punt or go for it ###############
-
-################################ DON'T USE THIS ONE #######################
-# dataset with down = 4
-chi4th$posteam
-cc <- which(chidata$down == 4)
-chi4th <- chidata[cc, ]
-cc <- which(chi4th$posteam == "CHI")
-chi4th <- chidata[cc, ]
-
-chi4th$posteam 
-# #only 130 if just the bears on offense
+# not a good model to predict as it is
+# chi4th$posteam
+# cc <- which(chidata$down == 4)
+# chi4th <- chidata[cc, ]
+# cc <- which(chi4th$posteam == "CHI")
+# chi4th <- chidata[cc, ]
 # 
-# cc <- which(divdata$down == 4)
-# div4th <- divdata[cc, ]     #1033 with division
-
-
-TRG_PCT=0.8
-nr=nrow(chi4th)
-trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
-
-c4trn=chi4th[trnIndex,]   #training data with the randomly selected row-indices
-c4tst = chi4th[-trnIndex, ]
-
-m3subset= select(c4trn, -c("game_id", "home_team", "away_team", "sp", "drive_ended_with_score", "posteam_score", "defteam_score", "play_type",
-                            "special", "pass_touchdown", "rush_touchdown", "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "drive_inside20", "goal_to_go",
-                            "temp", "start_time", "shotgun", "pass", "rush", "yards_gained", "field_goal_result", "down", "ydstogo"))
-
-summary(m3subset$punt_attempt)
-rpModel3=rpart(punt_attempt ~ ., data=m3subset, method= "class", 
-               parms = list(split = "information"), 
-               control = rpart.control(minsplit = 30), na.action=na.omit)
-
-# plotting the tree
-rpModel3$variable.importance
-rpart.plot::prp(rpModel3, type=2, extra=100)
-
-# train and test accuracy??
-predTrn=predict(rpModel4, FGtrn, type='class')
-table(pred = predTrn, true=FGtrn$field_goal_result)
-mean(predTrn == FGtrn$field_goal_result)
-table(pred = predict(rpModel2, FGtst, type='class'), true=FGtst$field_goal_result)
-mean(predict(rpModel4, FGtst, type='class') == FGtst$field_goal_result)
+# chi4th$posteam 
+# # #only 130 if just the bears on offense
+# # 
+# # cc <- which(divdata$down == 4)
+# # div4th <- divdata[cc, ]     #1033 with division
+# 
+# 
+# TRG_PCT=0.7
+# nr=nrow(chi4th)
+# trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+# 
+# c4trn=chi4th[trnIndex,]   #training data with the randomly selected row-indices
+# c4tst = chi4th[-trnIndex, ]
+# 
+# m3subset= select(c4trn, -c("game_id", "home_team", "away_team", "sp", "drive_ended_with_score", "posteam_score", "defteam_score", "play_type",
+#                             "special", "pass_touchdown", "rush_touchdown", "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "drive_inside20", "goal_to_go",
+#                             "start_time", "shotgun", "pass", "rush", "yards_gained", "field_goal_result", "down", "ydstogo"))
+# 
+# summary(m3subset$punt_attempt)
+# rpModel3=rpart(punt_attempt ~ ., data=m3subset, method= "class", 
+#                parms = list(split = "information"), 
+#                control = rpart.control(minsplit = 30), na.action=na.omit)
+# 
+# # plotting the tree
+# rpModel3$variable.importance
+# rpart.plot::prp(rpModel3, type=2, extra=100)
+# 
+# # train and test accuracy??
+# predTrn=predict(rpModel4, FGtrn, type='class')
+# table(pred = predTrn, true=FGtrn$field_goal_result)
+# mean(predTrn == FGtrn$field_goal_result)
+# table(pred = predict(rpModel2, FGtst, type='class'), true=FGtst$field_goal_result)
+# mean(predict(rpModel4, FGtst, type='class') == FGtst$field_goal_result)
 
 
 
