@@ -223,7 +223,7 @@ pred_class <- as.factor(ifelse(pred >= 0.5, "1", "0"))
 library(caret)
 confusionMatrix(pred_class, PRchiTrn$pass)
 
-###################### model 2 ############################ RZ score y or no
+##################### model 2 ############################ RZ score y or no
 #test/train split--- 488 rows- is this enough?
 TRG_PCT=0.8
 nr=nrow(chidataRED)
