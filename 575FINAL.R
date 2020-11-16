@@ -321,3 +321,138 @@ mean(predTrn == FGtrn$field_goal_result)
 table(pred = predict(rpModel2, FGtst, type='class'), true=FGtst$field_goal_result)
 mean(predict(rpModel4, FGtst, type='class') == FGtst$field_goal_result)
 
+############################################## NFC North Division Comparisons ################################################################
+######################################### Green Bay ###########################################################
+# make greenbay  df
+gbdata <- pdata[grep("GB", pdata$posteam), ]
+head(gbdata)
+
+#for outcome 2--- make new df w just that in the redzone
+gbd <- which(gbdata$drive_inside20==1)
+gbdataRED <- gbdata[gbd, ]
+gbdataRED$drive_ended_with_score <- na.omit(gbdataRED$drive_ended_with_score)
+summary(gbdataRED$drive_ended_with_score)  #label imbalance
+
+# in game prop of pass to rush- can change to play type so it says which is which---------------
+ggplot(gbdata, aes(y = game_date)) +
+  geom_bar(aes(fill = pass), position = position_stack(reverse = TRUE)) + coord_flip() +
+  labs(title = "Proportion of rush to pass Green Bay 2019 Season") + theme_bw() +   
+  scale_fill_manual("legend", values = c("0" = "green", "1" = "yellow"))
+
+
+ggplot(gbdata[!is.na(gbdata$play_type),], aes( x = play_type)) + geom_bar(fill="green") + 
+  labs(title = "Play Types for Green Bay Packers 2019") + theme_bw()
+
+ggplot(gbdata, aes(x = game_date)) + geom_bar(fill="green", ) + 
+  labs(title = "Green Bay Packers - Plays per game") + theme_bw() 
+
+#All Plays for Green Bay graph
+all_GB_Play <- gbdata %>% filter(gbdata$play_type != "NA") %>%
+  droplevels()
+table(all_GB_Play$play_type)
+ggplot(all_GB_Play, aes(x = play_type), position = position_stack(reverse = TRUE)) + 
+  coord_flip() + geom_bar(fill="lightblue") + 
+  labs(title = "Play Types for Green Bay Packers 2019") + theme_bw()
+
+#Rush vs. Pass for Green Bay table and Graph
+PRgbdata <- gbdata %>% filter(gbdata$play_type == "run" | gbdata$play_type == "pass") %>%
+  droplevels()
+table(PRgbdata$play_type)
+GB_table<- table(PRgbdata$game_date, PRgbdata$play_type)
+kable(GB_table, "simple", align = "c")
+
+#Graph with count for all games
+ggplot(PRgbdata, aes(x = play_type), position = position_stack(reverse = TRUE))+
+  coord_flip()+geom_bar(stat = "identity")+
+  labs(title = "Green Bay Packers Pass vs. Rush for each Game", x = "Game", y = "Count of Plays")+ 
+  scale_fill_discrete(labels = c("Pass", "Run"))+ theme(axis.text.x = element_text(angle = 45))+ theme_bw()
+
+######################################### Minnesota Vikings ###########################################################
+# make minnesota  df
+mvdata <- pdata[grep("MIN", pdata$posteam), ]
+head(mvdata)
+
+#for outcome 2--- make new df w just that in the redzone
+mvd <- which(mvdata$drive_inside20==1)
+mvdataRED <- mvdata[mvd, ]
+mvdataRED$drive_ended_with_score <- na.omit(mvdataRED$drive_ended_with_score)
+summary(mvdataRED$drive_ended_with_score)  #label imbalance
+
+# in game prop of pass to rush- can change to play type so it says which is which---------------
+ggplot(mvdata, aes(y = game_date)) +
+  geom_bar(aes(fill = pass), position = position_stack(reverse = TRUE)) + coord_flip() +
+  labs(title = "Proportion of rush to pass Minnesota 2019 Season") + theme_bw() +   
+  scale_fill_manual("legend", values = c("0" = "yellow", "1" = "purple"))
+
+
+ggplot(mvdata[!is.na(mvdata$play_type),], aes( x = play_type)) + geom_bar(fill="purple") + 
+  labs(title = "Play Types for Minnesota Vikings 2019") + theme_bw()
+
+
+ggplot(mvdata, aes(x = game_date)) + geom_bar(fill="purple", ) + 
+  labs(title = "Minnesota Vikings- Plays per game") + theme_bw() #+
+
+#All Plays for Minnesota graph
+all_MV_Play <- mvdata %>% filter(mvdata$play_type != "NA") %>%
+  droplevels()
+table(all_MV_Play$play_type)
+ggplot(all_MV_Play, aes(x = play_type), position = position_stack(reverse = TRUE)) + 
+  coord_flip() + geom_bar(fill="purple") + 
+  labs(title = "Play Types for Minnesota Vikings 2019") + theme_bw()
+
+#Rush vs. Pass for Minnesota table and Graph
+PRmvdata <- gbdata %>% filter(mvdata$play_type == "run" | mvdata$play_type == "pass") %>%
+  droplevels()
+table(PRmvdata$play_type)
+MV_table<- table(PRgbdata$game_date, PRmvdata$play_type)
+table(MV_table, "simple", align = "c")
+
+#Graph with count for all games
+ggplot(PRmvdata, aes(x = play_type), position = position_stack(reverse = TRUE))+
+  coord_flip()+geom_bar(stat = "identity")+
+  labs(title = "Minnesoty Vikings Pass vs. Rush for each Game", x = "Game", y = "Count of Plays")+ 
+  scale_fill_discrete(labels = c("Pass", "Run"))+ theme(axis.text.x = element_text(angle = 45))+ theme_bw()
+
+######################################### Detroit Lions  ###########################################################
+# make detroit  df
+dldata <- pdata[grep("DET", pdata$posteam), ]
+head(dldata)
+
+#for outcome 2--- make new df w just that in the redzone
+dld <- which(dldata$drive_inside20==1)
+dldataRED <- dldata[mvd, ]
+dldataRED$drive_ended_with_score <- na.omit(dldataRED$drive_ended_with_score)
+summary(dldataRED$drive_ended_with_score)  #label imbalance
+
+# in game prop of pass to rush- can change to play type so it says which is which---------------
+ggplot(dldata, aes(y = game_date)) +
+  geom_bar(aes(fill = pass), position = position_stack(reverse = TRUE)) + coord_flip() +
+  labs(title = "Proportion of rush to pass Detroit 2019 Season") + theme_bw() +   
+  scale_fill_manual("legend", values = c("0" = "skyblue", "1" = "gray"))
+
+ggplot(gbdata[!is.na(gbdata$play_type),], aes( x = play_type)) + geom_bar(fill="gray") + 
+  labs(title = "Play Types for Detroit Lions 2019") + theme_bw()
+
+ggplot(gbdata, aes(x = game_date)) + geom_bar(fill="gray", ) + 
+  labs(title = "Detoit Lions- Plays per game") + theme_bw() 
+
+#All Plays for Detroit graph
+all_DL_Play <- dldata %>% filter(dldata$play_type != "NA") %>%
+  droplevels()
+table(all_DL_Play$play_type)
+ggplot(all_DL_Play, aes(x = play_type), position = position_stack(reverse = TRUE)) + 
+  coord_flip() + geom_bar(fill="gray") + 
+  labs(title = "Play Types for Detroit Lions 2019") + theme_bw()
+
+#Rush vs. Pass for Detroit table and Graph
+PRdldata <- dldata %>% filter(dldata$play_type == "run" | dldata$play_type == "pass") %>%
+  droplevels()
+table(PRdldata$play_type)
+DL_table<- table(PRdldata$game_date, PRmvdata$play_type)
+table(DL_table, "simple", align = "c")
+
+#Graph with count for all games
+ggplot(PRdldata, aes(x = play_type), position = position_stack(reverse = TRUE))+
+  coord_flip()+geom_bar(stat = "identity")+
+  labs(title = "Detroit Lions Pass vs. Rush for each Game", x = "Game", y = "Count of Plays")+ 
+  scale_fill_discrete(labels = c("Pass", "Run"))+ theme(axis.text.x = element_text(angle = 45))+ theme_bw()
