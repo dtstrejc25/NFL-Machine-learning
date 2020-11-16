@@ -381,5 +381,87 @@ pred4 <- predict(mod4_glm, newdata = FGtst)
 pred_class4 <- as.factor(ifelse(pred4 >= 0.5, "made", "missed"))
 library(caret)
 confusionMatrix(pred_class4, FGtst$field_goal_result)
+##############################################################################################################################################################
+BLrm <- c("play_id","old_game_id","season_type","game_half","quarter_end", "drive" , "time", "desc","qb_dropback","qb_kneel","qb_spike","qb_scramble",
+           "pass_length","pass_location","air_yards","yards_after_catch","run_location","run_gap","kick_distance","two_point_conv_result"
+           ,"home_timeouts_remaining","away_timeouts_remaining","timeout","timeout_team","posteam_timeouts_remaining","defteam_timeouts_remaining"
+           ,"posteam_score_post","defteam_score_post","score_differential_post","opp_fg_prob","opp_safety_prob","opp_td_prob","safety_prob","td_prob","extra_point_prob"
+           ,"two_point_conversion_prob","first_down_penalty","third_down_converted","third_down_failed","incomplete_pass","touchback","interception","punt_inside_twenty"
+           ,"punt_in_endzone","punt_out_of_bounds","punt_downed","punt_fair_catch","kickoff_inside_twenty","kickoff_in_endzone","kickoff_out_of_bounds","kickoff_downed","kickoff_fair_catch","fumble_forced"
+           ,"fumble_not_forced","fumble_out_of_bounds","solo_tackle","safety","penalty","tackled_for_loss","fumble_lost","own_kickoff_recovery","own_kickoff_recovery_td"
+           ,"qb_hit","sack","return_touchdown","extra_point_attempt","two_point_attempt","field_goal_attempt","kickoff_attempt","fumble","complete_pass"
+           ,"assist_tackle","lateral_reception","lateral_rush","lateral_return","lateral_recovery","passer_player_id","passer_player_name","receiver_player_id","receiver_player_name"
+           ,"rusher_player_id","rusher_player_name","lateral_receiver_player_id","lateral_receiver_player_name","lateral_rusher_player_id","lateral_rusher_player_name"
+           ,"lateral_sack_player_id","lateral_sack_player_name","interception_player_id","interception_player_name","lateral_interception_player_id","lateral_interception_player_name"
+           ,"punt_returner_player_id","punt_returner_player_name","lateral_punt_returner_player_id","lateral_punt_returner_player_name","kickoff_returner_player_name","kickoff_returner_player_id"
+           ,"lateral_kickoff_returner_player_id","lateral_kickoff_returner_player_name","punter_player_id","punter_player_name","kicker_player_name","kicker_player_id"
+           ,"own_kickoff_recovery_player_id","own_kickoff_recovery_player_name","blocked_player_id","blocked_player_name","tackle_for_loss_1_player_id","tackle_for_loss_1_player_name","tackle_for_loss_2_player_id"
+           ,"tackle_for_loss_2_player_name","qb_hit_1_player_id","qb_hit_1_player_name","qb_hit_2_player_id","qb_hit_2_player_name","forced_fumble_player_1_team","forced_fumble_player_1_player_id"
+           ,"forced_fumble_player_1_player_name","forced_fumble_player_2_team","forced_fumble_player_2_player_id","forced_fumble_player_2_player_name","solo_tackle_1_team","solo_tackle_2_team","solo_tackle_1_player_id"
+           ,"solo_tackle_2_player_id","solo_tackle_1_player_name","solo_tackle_2_player_name","assist_tackle_1_player_id","assist_tackle_1_player_name","assist_tackle_1_team","assist_tackle_2_player_id","assist_tackle_2_player_name"
+           ,"assist_tackle_2_team","assist_tackle_3_player_id","assist_tackle_3_player_name","assist_tackle_3_team","assist_tackle_4_player_id","assist_tackle_4_player_name"
+           ,"assist_tackle_4_team","pass_defense_1_player_id","pass_defense_1_player_name","pass_defense_2_player_id","pass_defense_2_player_name","fumbled_1_team"
+           ,"fumbled_1_player_id","fumbled_1_player_name","fumbled_2_player_id","fumbled_2_player_name","fumbled_2_team","fumble_recovery_1_team","fumble_recovery_1_yards","fumble_recovery_1_player_id"
+           ,"fumble_recovery_1_player_name","fumble_recovery_2_team","fumble_recovery_2_yards","fumble_recovery_2_player_id","fumble_recovery_2_player_name","return_team"
+           ,"return_yards","penalty_team","penalty_player_id","penalty_yards","replay_or_challenge","replay_or_challenge_result","penalty_type","defensive_two_point_attempt"
+           ,"defensive_two_point_conv","defensive_extra_point_attempt","defensive_extra_point_conv","season","stadium","play_clock","play_deleted","st_play_type"
+           ,"drive_quarter_start","drive_quarter_end","drive_yards_penalized","drive_start_transition","drive_end_transition","drive_game_clock_start"
+           ,"drive_game_clock_end","drive_play_id_started","drive_play_id_ended","game_stadium","first_down","aborted_play","passer_id","rusher_id","receiver_id","name"
+           ,"id","qb_epa","xyac_epa","xyac_mean_yardage","xyac_median_yardage","xyac_success","xyac_fd", "order_sequence","nfl_api_id","end_clock_time","drive_real_start_time","location","result",
+            "play_type_nfl", "side_of_field", "drive_start_yard_line", "drive_end_yard_line", "end_yard_line","home_coach", "away_coach","yrdln", "ydsnet")
 
+pdata <- pdata %>% select(-BLrm)
+summary(pdata)
+#########################################################################
+########################################## Baseline ####################################################
+library(ranger)
+# install.packages(ranger)
+# 
+# #Rush vs. Pass for Chicago table and Graph
+PRchidataBL <- chidata %>% filter(chidata$play_type == "run" | chidata$play_type == "pass") %>%
+  droplevels()
+table(PRchidata$play_type)
+Chi_table<- table(PRchidata$game_date, PRchidata$play_type)
+table(Chi_table, "simple", align = "c")
 
+#test/train split
+TRG_PCT=0.7
+nr=nrow(PRchidata)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+PRchiTrnBL = PRchidataBL[trnIndex,]   #training data with the randomly selected row-indices
+PRchiTstBL = PRchidataBL[-trnIndex,]
+
+summary(PRchiTrnBL)
+## model 1 ##
+#to include
+BLsubset = select(PRchiTrnBL, c("game_id", "home_team", "away_team", "sp", "field_goal_result", "rush", "play_type",
+                  "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
+                  "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun", "yards_gained",
+                  "temp", "start_time","ep","epa","total_home_epa","total_away_epa","total_home_rush_epa","total_away_rush_epa","total_home_pass_epa"
+                  ,"total_away_pass_epa","air_epa","yac_epa","comp_air_epa","comp_yac_epa","total_home_comp_air_epa","total_away_comp_air_epa","total_home_comp_yac_epa"
+                  ,"total_away_comp_yac_epa","total_home_raw_air_epa","total_away_raw_air_epa","total_home_raw_yac_epa","total_away_raw_yac_epa","wp","def_wp"
+                  ,"home_wp","away_wp","wpa","home_wp_post","away_wp_post","vegas_wp","vegas_home_wp","total_home_rush_wpa","total_away_rush_wpa","total_home_pass_wpa"
+                  ,"total_away_pass_wpa","air_wpa","yac_wpa","comp_air_wpa","comp_yac_wpa","total_home_comp_air_wpa","total_away_comp_air_wpa","total_home_comp_yac_wpa"
+                  ,"total_away_comp_yac_wpa","total_home_raw_air_wpa","total_away_raw_air_wpa","total_home_raw_yac_wpa","total_away_raw_yac_wpa","first_down_rush"
+                  ,"first_down_pass","weather","drive_play_count"
+                  ,"drive_time_of_possession","drive_first_downs","away_score","home_score","total","spread_line","total_line"
+                  ,"stadium_id","success","play","rush_attempt", "pass_attempt",
+                  "special_teams_play", "penalty_player_name", "passer", "rusher", "receiver", "series_success", "cp", "cpoe", 
+                  "no_score_prob", "fg_prob"))
+                  
+
+rpModelBL=rpart(pass ~ .e ~ ., data=BLsubset, method= "class", 
+                parms = list(split = "information"), 
+                control = rpart.control(minsplit = 30), na.action=na.omit)
+
+# plotting the tree
+rpModelBL$variable.importance
+rpart.plot::prp(rpModelBL, type=2, extra=100)
+
+# train and test accuracy 
+predTrn=predict(rpModelBL, PRchiTrnBL, type='class')
+table(pred = predTrn, true=PRchiTrnBL$pass)
+mean(predTrn == PRchiTrnBL$pass)
+table(pred = predict(rpModelBL, PRchiTstBL, type='class'), true=PRchiTstBL$pass)
+mean(predict(rpModelBL, PRchiTstBL, type='class') == PRchiTstBL$pass)
