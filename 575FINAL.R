@@ -249,10 +249,11 @@ PRchiTst = PRchidata[-trnIndex,]
 
 ## model 1 ##
 #to include
-m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "field_goal_result", "rush", "play_type",
+m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "rush", "play_type",
                               "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun", "yards_gained",
-                              "defteam", "ydsnet", "series_success", "no_score_prob"))  
+                              "defteam", "ydsnet", "series_success", "no_score_prob"))
+ 
 
 
 library(ranger)
@@ -304,7 +305,7 @@ trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
 redchiTrn=chidataRED[trnIndex,]   #training data with the randomly selected row-indices
 redchiTst = chidataRED[-trnIndex, ]
 
-m2subset= select(redchiTrn, -c("home_team", "away_team", "sp", "field_goal_result", "game_date", "posteam_type"
+m2subset= select(redchiTrn, -c("home_team", "away_team", "sp", "game_date", "posteam_type"
                                ,"special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
                                "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "ydsnet", "drive_inside20")) 
 
@@ -350,291 +351,6 @@ confusionMatrix(pred_class2, redchiTst$drive_ended_with_score)
 
 
 
-######################################### model 3 ############## punt or go for it ###############
-# not a good model to predict as it is
-# chi4th$posteam
-# cc <- which(chidata$down == 4)
-# chi4th <- chidata[cc, ]
-# cc <- which(chi4th$posteam == "CHI")
-# chi4th <- chidata[cc, ]
-# 
-# chi4th$posteam 
-# # #only 130 if just the bears on offense
-# # 
-# # cc <- which(divdata$down == 4)
-# # div4th <- divdata[cc, ]     #1033 with division
-# 
-# 
-# TRG_PCT=0.7
-# nr=nrow(chi4th)
-# trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
-# 
-# c4trn=chi4th[trnIndex,]   #training data with the randomly selected row-indices
-# c4tst = chi4th[-trnIndex, ]
-# 
-# m3subset= select(c4trn, -c("game_id", "home_team", "away_team", "sp", "drive_ended_with_score", "posteam_score", "defteam_score", "play_type",
-#                             "special", "pass_touchdown", "rush_touchdown", "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "drive_inside20", "goal_to_go",
-#                             "start_time", "shotgun", "pass", "rush", "yards_gained", "field_goal_result", "down", "ydstogo"))
-# 
-# summary(m3subset$punt_attempt)
-# rpModel3=rpart(punt_attempt ~ ., data=m3subset, method= "class", 
-#                parms = list(split = "information"), 
-#                control = rpart.control(minsplit = 30), na.action=na.omit)
-# 
-# # plotting the tree
-# rpModel3$variable.importance
-# rpart.plot::prp(rpModel3, type=2, extra=100)
-# 
-# # train and test accuracy??
-# predTrn=predict(rpModel4, FGtrn, type='class')
-# table(pred = predTrn, true=FGtrn$field_goal_result)
-# mean(predTrn == FGtrn$field_goal_result)
-# table(pred = predict(rpModel2, FGtst, type='class'), true=FGtst$field_goal_result)
-# mean(predict(rpModel4, FGtst, type='class') == FGtst$field_goal_result)
-
-
-
-
-########################  FG model ###########################
-#### predict if a FG was made ####
-
-#############  FG with the whole league -- otherwise it's too small 
-
-FGdata <- pdata %>% filter(pdata$field_goal_result == "made" | pdata$field_goal_result == "missed") %>% droplevels()
-#999
-
-TRG_PCT=0.7
-nr=nrow(FGdata)
-trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
-
-FGtrn=FGdata[trnIndex,]   #training data with the randomly selected row-indices
-FGtst = FGdata[-trnIndex, ]
-
-m4subset= select(FGtrn, -c("game_id", "home_team", "away_team", "sp", "drive_ended_with_score", "posteam_score", "defteam_score",
-                           "special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam", "play_type",
-                           "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "drive_inside20", "goal_to_go",
-                           "start_time", "game_date"))  
-
-
-rpModel4=rpart(field_goal_result ~ ., data=m4subset, method= "class", 
-               parms = list(split = "information"), 
-               control = rpart.control(minsplit = 30), na.action=na.omit)
-
-
-# plotting the tree
-rpModel4$variable.importance
-rpart.plot::prp(rpModel4, type=2, extra=100)
-
-# train and test accuracy??
-predTrn=predict(rpModel4, FGtrn, type='class')
-table(pred = predTrn, true=FGtrn$field_goal_result)
-mean(predTrn == FGtrn$field_goal_result)
-table(pred = predict(rpModel2, FGtst, type='class'), true=FGtst$field_goal_result)
-mean(predict(rpModel4, FGtst, type='class') == FGtst$field_goal_result)
-
-#GLM model for FG 
-summary(m4subset)
-week + yardline_100 + game_date + quarter_seconds_remaining + half_seconds_remaining + game_seconds_remaining +
-  half_seconds_remaining + game_seconds_remaining + qtr + down + goal_to_go + ydstogo + no_huddle + series + time_of_day +
-  drive_inside20 +div_game +roof + surface + start_group
-
-mod4_play_type <- glm(field_goal_result ~ week + posteam_type + yardline_100 + quarter_seconds_remaining + 
-                        half_seconds_remaining + game_seconds_remaining + qtr + down + ydstogo + play_type + 
-                        field_goal_result + series + time_of_day + div_game +
-                        roof + surface + start_group, data = m4subset, family = "binomial")
-
-full_model4 <- mod4_play_type
-null_model4 <- glm(field_goal_result ~ 1, data = m4subset, family = "binomial")
-step(null_model4, scope = list(lower = null_model4, upper = full_model4), direction = "both")
-
-mod4_glm <- glm(field_goal_result ~ yardline_100 + week, family = "binomial", data = m4subset)
-
-#Test Accuracy 
-pred4 <- predict(mod4_glm, newdata = FGtst)
-pred_class4 <- as.factor(ifelse(pred4 >= 0.5, "made", "missed"))
-library(caret)
-confusionMatrix(pred_class4, FGtst$field_goal_result)
-##############################################################################################################################################################
-#########################################################################
-########################################## Baseline ####################################################
-library(ranger)
-# install.packages(ranger)
-pdata2 <- Play_By_Play_2019_Proposal
-# 
-BLrm <- c("play_id","old_game_id","season_type","game_half","quarter_end", "drive" , "time", "desc","qb_dropback","qb_kneel","qb_spike","qb_scramble",
-          "pass_length","pass_location","air_yards","yards_after_catch","run_location","run_gap","kick_distance","two_point_conv_result"
-          ,"home_timeouts_remaining","away_timeouts_remaining","timeout","timeout_team","posteam_timeouts_remaining","defteam_timeouts_remaining"
-          ,"posteam_score_post","defteam_score_post","score_differential_post","opp_fg_prob","opp_safety_prob","opp_td_prob","safety_prob","td_prob","extra_point_prob"
-          ,"two_point_conversion_prob","first_down_penalty","third_down_converted","third_down_failed","incomplete_pass","touchback","interception","punt_inside_twenty"
-          ,"punt_in_endzone","punt_out_of_bounds","punt_downed","punt_fair_catch","kickoff_inside_twenty","kickoff_in_endzone","kickoff_out_of_bounds","kickoff_downed","kickoff_fair_catch","fumble_forced"
-          ,"fumble_not_forced","fumble_out_of_bounds","solo_tackle","safety","penalty","tackled_for_loss","fumble_lost","own_kickoff_recovery","own_kickoff_recovery_td"
-          ,"qb_hit","sack","return_touchdown","extra_point_attempt","two_point_attempt","field_goal_attempt","kickoff_attempt","fumble","complete_pass"
-          ,"assist_tackle","lateral_reception","lateral_rush","lateral_return","lateral_recovery","passer_player_id","passer_player_name","receiver_player_id","receiver_player_name"
-          ,"rusher_player_id","rusher_player_name","lateral_receiver_player_id","lateral_receiver_player_name","lateral_rusher_player_id","lateral_rusher_player_name"
-          ,"lateral_sack_player_id","lateral_sack_player_name","interception_player_id","interception_player_name","lateral_interception_player_id","lateral_interception_player_name"
-          ,"punt_returner_player_id","punt_returner_player_name","lateral_punt_returner_player_id","lateral_punt_returner_player_name","kickoff_returner_player_name","kickoff_returner_player_id"
-          ,"lateral_kickoff_returner_player_id","lateral_kickoff_returner_player_name","punter_player_id","punter_player_name","kicker_player_name","kicker_player_id"
-          ,"own_kickoff_recovery_player_id","own_kickoff_recovery_player_name","blocked_player_id","blocked_player_name","tackle_for_loss_1_player_id","tackle_for_loss_1_player_name","tackle_for_loss_2_player_id"
-          ,"tackle_for_loss_2_player_name","qb_hit_1_player_id","qb_hit_1_player_name","qb_hit_2_player_id","qb_hit_2_player_name","forced_fumble_player_1_team","forced_fumble_player_1_player_id"
-          ,"forced_fumble_player_1_player_name","forced_fumble_player_2_team","forced_fumble_player_2_player_id","forced_fumble_player_2_player_name","solo_tackle_1_team","solo_tackle_2_team","solo_tackle_1_player_id"
-          ,"solo_tackle_2_player_id","solo_tackle_1_player_name","solo_tackle_2_player_name","assist_tackle_1_player_id","assist_tackle_1_player_name","assist_tackle_1_team","assist_tackle_2_player_id","assist_tackle_2_player_name"
-          ,"assist_tackle_2_team","assist_tackle_3_player_id","assist_tackle_3_player_name","assist_tackle_3_team","assist_tackle_4_player_id","assist_tackle_4_player_name"
-          ,"assist_tackle_4_team","pass_defense_1_player_id","pass_defense_1_player_name","pass_defense_2_player_id","pass_defense_2_player_name","fumbled_1_team"
-          ,"fumbled_1_player_id","fumbled_1_player_name","fumbled_2_player_id","fumbled_2_player_name","fumbled_2_team","fumble_recovery_1_team","fumble_recovery_1_yards","fumble_recovery_1_player_id"
-          ,"fumble_recovery_1_player_name","fumble_recovery_2_team","fumble_recovery_2_yards","fumble_recovery_2_player_id","fumble_recovery_2_player_name","return_team"
-          ,"return_yards","penalty_team","penalty_player_id","penalty_yards","replay_or_challenge","replay_or_challenge_result","penalty_type","defensive_two_point_attempt"
-          ,"defensive_two_point_conv","defensive_extra_point_attempt","defensive_extra_point_conv","season","stadium","play_clock","play_deleted","st_play_type"
-          ,"drive_quarter_start","drive_quarter_end","drive_yards_penalized","drive_start_transition","drive_end_transition","drive_game_clock_start"
-          ,"drive_game_clock_end","drive_play_id_started","drive_play_id_ended","game_stadium","first_down","aborted_play","passer_id","rusher_id","receiver_id","name"
-          ,"id","qb_epa","xyac_epa","xyac_mean_yardage","xyac_median_yardage","xyac_success","xyac_fd", "order_sequence","nfl_api_id","end_clock_time","drive_real_start_time","location","result",
-          "play_type_nfl", "side_of_field", "drive_start_yard_line", "drive_end_yard_line", "end_yard_line","home_coach", "away_coach","yrdln", "ydsnet")
-pdata <- pdata2
-pdata <- pdata %>% select(-BLrm)
-str(chidata)
-pdata= pdata %>% mutate_if(is.character, as.factor)
-#########################################################################
-########################################## Baseline ####################################################
-library(ranger)
-# install.packages(ranger)
-# 
-# #Rush vs. Pass for Chicago table and Graph
-PRchidataBL <- chidata %>% filter(chidata$play_type == "run" | chidata$play_type == "pass") %>%
-  droplevels()
-table(PRchidata$play_type)
-Chi_table<- table(PRchidata$game_date, PRchidata$play_type)
-table(Chi_table, "simple", align = "c")
-
-#test/train split
-TRG_PCT=0.7
-nr=nrow(PRchidata)
-trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
-
-PRchiTrnBL = PRchidataBL[trnIndex,]   #training data with the randomly selected row-indices
-PRchiTstBL = PRchidataBL[-trnIndex,]
-
-summary(PRchiTrnBL)
-## model 1 ##
-#to include  #88
-BLsubset = select(PRchiTrnBL, c("game_id", "home_team", "away_team", "sp", "field_goal_result", "play_type",
-                                "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
-                                "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun", "yards_gained",
-                                "temp", "start_time","ep","epa","total_home_epa","total_away_epa","total_home_rush_epa","total_away_rush_epa","total_home_pass_epa"
-                                ,"total_away_pass_epa","air_epa","yac_epa","comp_air_epa","comp_yac_epa","total_home_comp_air_epa","total_away_comp_air_epa","total_home_comp_yac_epa"
-                                ,"total_away_comp_yac_epa","total_home_raw_air_epa","total_away_raw_air_epa","total_home_raw_yac_epa","total_away_raw_yac_epa","wp","def_wp"
-                                ,"home_wp","away_wp","wpa","home_wp_post","away_wp_post","vegas_wp","vegas_home_wp","total_home_rush_wpa","total_away_rush_wpa","total_home_pass_wpa"
-                                ,"total_away_pass_wpa","air_wpa","yac_wpa","comp_air_wpa","comp_yac_wpa","total_home_comp_air_wpa","total_away_comp_air_wpa","total_home_comp_yac_wpa"
-                                ,"total_away_comp_yac_wpa","total_home_raw_air_wpa","total_away_raw_air_wpa","total_home_raw_yac_wpa","total_away_raw_yac_wpa","first_down_rush"
-                                ,"first_down_pass","weather","drive_play_count" 
-                                ,"drive_time_of_possession","drive_first_downs","away_score","home_score","total","spread_line","total_line"
-                                ,"stadium_id","success","play",
-                                "special_teams_play", "penalty_player_name", "passer", "rusher", "receiver", "series_success", "cp", "cpoe", 
-                                "no_score_prob", "fg_prob"))
-
-
-rpModelBL=rpart(play_type ~ ., data=BLsubset, method= "class", 
-                parms = list(split = "information"), 
-                control = rpart.control(minsplit = 30), na.action=na.omit)
-
-# plotting the tree
-rpModelBL$variable.importance
-rpart.plot::prp(rpModelBL, type=2, extra=100)
-
-# train and test accuracy 
-predTrn=predict(rpModelBL, PRchiTrnBL, type='class')
-table(pred = predTrn, true=PRchiTrnBL$play_type)
-mean(predTrn == PRchiTrnBL$play_type)
-table(pred = predict(rpModelBL, PRchiTstBL, type='class'), true=PRchiTstBL$play_type)
-mean(predict(rpModelBL, PRchiTstBL, type='class') == PRchiTstBL$play_type)
-
-
-######################   for field goal  #############
-
-FGdata <- pdata %>% filter(pdata$field_goal_result == "made" | pdata$field_goal_result == "missed") %>% droplevels()
-#999
-
-TRG_PCT=0.7
-nr=nrow(FGdata)
-trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
-
-FGtrn=FGdata[trnIndex,]   #training data with the randomly selected row-indices
-FGtst = FGdata[-trnIndex, ]
-
-
-BLsubset = select(FGtrn, c("game_id", "home_team", "away_team", "field_goal_result", "play_type", "field_goal_result",
-                                "special", "punt_attempt", "pass_touchdown", "rush_touchdown",
-                                "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun", "yards_gained",
-                                "temp", "start_time","ep","epa","total_home_epa","total_away_epa","total_home_rush_epa","total_away_rush_epa","total_home_pass_epa"
-                                ,"total_away_pass_epa","air_epa","yac_epa","comp_air_epa","comp_yac_epa","total_home_comp_air_epa","total_away_comp_air_epa","total_home_comp_yac_epa"
-                                ,"total_away_comp_yac_epa","total_home_raw_air_epa","total_away_raw_air_epa","total_home_raw_yac_epa","total_away_raw_yac_epa","wp","def_wp"
-                                ,"home_wp","away_wp","wpa","home_wp_post","away_wp_post","vegas_wp","vegas_home_wp","total_home_rush_wpa","total_away_rush_wpa","total_home_pass_wpa"
-                                ,"total_away_pass_wpa","air_wpa","yac_wpa","comp_air_wpa","comp_yac_wpa","total_home_comp_air_wpa","total_away_comp_air_wpa","total_home_comp_yac_wpa"
-                                ,"total_away_comp_yac_wpa","total_home_raw_air_wpa","total_away_raw_air_wpa","total_home_raw_yac_wpa","total_away_raw_yac_wpa","first_down_rush"
-                                ,"first_down_pass","weather","drive_play_count" 
-                                ,"drive_time_of_possession","drive_first_downs","away_score","home_score","total","spread_line","total_line"
-                                ,"stadium_id","success","play",
-                                "special_teams_play", "penalty_player_name", "passer", "rusher", "receiver", "series_success", "cp", "cpoe", 
-                                "no_score_prob", "fg_prob"))
-
-
-rpModelBL=rpart(field_goal_result ~ ., data=BLsubset, method= "class", 
-                parms = list(split = "information"), 
-                control = rpart.control(minsplit = 30), na.action=na.omit)
-
-# plotting the tree
-rpModelBL$variable.importance
-rpart.plot::prp(rpModelBL, type=2, extra=100)
-
-
-predTrn=predict(rpModelBL, FGtrn, type='class')
-table(pred = predTrn, true=FGtrn$field_goal_result)
-mean(predTrn == FGtrn$field_goal_result)
-table(pred = predict(rpModelBL, FGtst, type='class'), true=FGtst$field_goal_result)
-mean(predict(rpModelBL, FGtst, type='class') == FGtst$field_goal_result)
-
-
-#############   chi red zone baseline ####################
-
-
-TRG_PCT=0.8
-nr=nrow(chidataRED)
-trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
-
-redchiTrn=chidataRED[trnIndex,]   #training data with the randomly selected row-indices
-redchiTst = chidataRED[-trnIndex, ]
-
-BLsubset = select(redchiTrn, c("game_id", "home_team", "away_team", "field_goal_result", "play_type", "field_goal_result",
-                           "special", "punt_attempt", "pass_touchdown", "rush_touchdown", "drive_ended_with_score",
-                           "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun", "yards_gained",
-                           "temp", "start_time","ep","epa","total_home_epa","total_away_epa","total_home_rush_epa","total_away_rush_epa","total_home_pass_epa"
-                           ,"total_away_pass_epa","air_epa","yac_epa","comp_air_epa","comp_yac_epa","total_home_comp_air_epa","total_away_comp_air_epa","total_home_comp_yac_epa"
-                           ,"total_away_comp_yac_epa","total_home_raw_air_epa","total_away_raw_air_epa","total_home_raw_yac_epa","total_away_raw_yac_epa","wp","def_wp"
-                           ,"home_wp","away_wp","wpa","home_wp_post","away_wp_post","vegas_wp","vegas_home_wp","total_home_rush_wpa","total_away_rush_wpa","total_home_pass_wpa"
-                           ,"total_away_pass_wpa","air_wpa","yac_wpa","comp_air_wpa","comp_yac_wpa","total_home_comp_air_wpa","total_away_comp_air_wpa","total_home_comp_yac_wpa"
-                           ,"total_away_comp_yac_wpa","total_home_raw_air_wpa","total_away_raw_air_wpa","total_home_raw_yac_wpa","total_away_raw_yac_wpa","first_down_rush"
-                           ,"first_down_pass","weather","drive_play_count" 
-                           ,"drive_time_of_possession","drive_first_downs","away_score","home_score","total","spread_line","total_line"
-                           ,"stadium_id","success","play",
-                           "special_teams_play", "penalty_player_name", "passer", "rusher", "receiver", "series_success", "cp", "cpoe", 
-                           "no_score_prob", "fg_prob"))
-
-rpModel2=rpart(drive_ended_with_score ~ ., data=BLsubset, method= "class", 
-               parms = list(split = "information"), 
-               control = rpart.control(minsplit = 30), na.action=na.omit)
-
-# plotting the tree
-rpModel2$variable.importance
-rpart.plot::prp(rpModel2, type=2, extra=100)
-
-# train and test accuracy??
-predTrn=predict(rpModel2, redchiTrn, type='class')
-table(pred = predTrn, true=redchiTrn$drive_ended_with_score)
-mean(predTrn == redchiTrn$drive_ended_with_score)
-table(pred = predict(rpModel2, redchiTst, type='class'), true=redchiTst$drive_ended_with_score)
-mean(predict(rpModel2, redchiTst, type='class') == redchiTst$drive_ended_with_score)
-
-
-
-
 ##### address the label imbalance
 #now for the drive end w score
 library(ROSE)
@@ -653,5 +369,6 @@ table(chidataredB_COM$drive_ended_with_score)
 PRchidataB_COM <- ovun.sample(pass ~ ., data = PRchidataCOMB, method = "both")$data
 table(PRchidataB_COM$pass)
 
+######### then for 2018
 
 
