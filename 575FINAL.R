@@ -44,6 +44,13 @@ v2rm <- c("play_id","game_id","old_game_id","season_type","game_half","quarter_e
           ,"stadium_id","success","play", "play_type_nfl", "side_of_field", "drive_start_yard_line", "drive_end_yard_line", "end_yard_line", "rush_attempt", "pass_attempt",
           "special_teams_play", "penalty_player_name","home_coach","away_coach","passer","rusher","receiver", "yrdln", "cp", "cpoe")
 ############## Update columns for inside games wind/temperature (65 set to average inside stadium temperature ################
+
+pdata2 <- Play_By_Play_2018 %>% select(-v2rm)
+m <- c("fixed_drive", "fixed_drive_result", "passer_jersey_number", "passer_jersey_number", "jersey_number",
+       "rusher_jersey_number", "receiver_jersey_number")
+pdata2 <- pdata2 %>% select(-m)
+
+
 pdata <- pdata %>% replace_na(list(temp=65, na.rm=TRUE))
 pdata<- pdata %>% replace_na(list(wind=0, na.rm=TRUE))
 
