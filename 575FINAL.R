@@ -300,14 +300,15 @@ trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
 redchiTrn=chidataRED[trnIndex,]   #training data with the randomly selected row-indices
 redchiTst = chidataRED[-trnIndex, ]
 
-m2subset= select(redchiTrn, -c("game_id", "home_team", "away_team", "sp", "field_goal_result", 
-                                "special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
-                                "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked",
-                                "start_time"))  
+m2subset= select(redchiTrn, -c("home_team", "away_team", "sp", "field_goal_result", 
+                               "special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked")) 
 
 rpModel2=rpart(drive_ended_with_score ~ ., data=m2subset, method= "class", 
                parms = list(split = "information"), 
                control = rpart.control(minsplit = 30), na.action=na.omit)
+
+
 
 # plotting the tree
 rpModel2$variable.importance
