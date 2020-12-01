@@ -151,6 +151,19 @@ chidataRED <- chidata[chid, ]
 chidataRED$drive_ended_with_score <- na.omit(chidataRED$drive_ended_with_score)
 summary(chidataRED$drive_ended_with_score)  #label imbalance
 
+# using the combined df for chicago data
+# make chicago df
+chidataCOMB <- pdataCOMB[grep("CHI", pdataCOMB$posteam), ]
+dim(chidataCOMB)  #2701 rows
+
+#for outcome 2--- make new df w just that in the redzone
+chid <- which(chidataCOMB$drive_inside20==1)
+chidataREDCOMB <- chidataCOMB[chid, ]
+chidataREDCOMB$drive_ended_with_score <- na.omit(chidataREDCOMB$drive_ended_with_score)
+dim(chidataREDCOMB)  #1035
+
+
+
 gbdata <- pdata[grep("GB", pdata$posteam), ]
 head(gbdata)
 
