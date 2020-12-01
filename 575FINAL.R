@@ -47,7 +47,7 @@ v2rm <- c("play_id","game_id","old_game_id","season_type","game_half","quarter_e
 
 pdata2 <- Play_By_Play_2018 %>% select(-v2rm)
 m <- c("fixed_drive", "fixed_drive_result", "passer_jersey_number", "passer_jersey_number", "jersey_number",
-       "rusher_jersey_number", "receiver_jersey_number")
+       "rusher_jersey_number", "receiver_jersey_number", "fg_prob")
 pdata2 <- pdata2 %>% select(-m)
 
 
