@@ -5,7 +5,7 @@
 pdata <- Play_By_Play_2019_Proposal
 
 v2rm <- c("play_id","game_id","old_game_id","season_type","game_half","quarter_end", "drive" , "time", "desc","qb_dropback","qb_kneel","qb_spike","qb_scramble",
-           "pass_length","pass_location","air_yards","yards_after_catch","run_location","run_gap","kick_distance","two_point_conv_result"
+          "pass_length","pass_location","air_yards","yards_after_catch","run_location","run_gap","kick_distance","two_point_conv_result"
           ,"home_timeouts_remaining","away_timeouts_remaining","timeout","timeout_team","posteam_timeouts_remaining","defteam_timeouts_remaining"
           ,"posteam_score_post","defteam_score_post","score_differential_post","opp_fg_prob","opp_safety_prob","opp_td_prob","safety_prob","td_prob","extra_point_prob"
           ,"two_point_conversion_prob","first_down_penalty","third_down_converted","third_down_failed","incomplete_pass","touchback","interception","punt_inside_twenty"
@@ -39,7 +39,7 @@ v2rm <- c("play_id","game_id","old_game_id","season_type","game_half","quarter_e
           ,"first_down_pass","order_sequence","weather","nfl_api_id","end_clock_time","drive_real_start_time","drive_play_count"
           ,"drive_time_of_possession","drive_first_downs","away_score","home_score","location","result","total","spread_line","total_line"
           ,"stadium_id","success","play", "play_type_nfl", "side_of_field", "drive_start_yard_line", "drive_end_yard_line", "end_yard_line", "rush_attempt", "pass_attempt",
-          "special_teams_play", "penalty_player_name","home_coach","away_coach","passer","rusher","receiver")
+          "special_teams_play", "penalty_player_name","home_coach","away_coach","passer","rusher","receiver", "yrdln")
 
 ############## Update columns for inside games wind/temperature (65 set to average inside stadium temperature ################
 pdata <- pdata %>% replace_na(list(temp=65, na.rm=TRUE))
