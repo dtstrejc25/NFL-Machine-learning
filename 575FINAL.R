@@ -92,7 +92,7 @@ pdata2[,nums] <- lapply(pdata2[,nums], as.numeric)
 library(lubridate)
 pdata$game_date <- parse_date_time(pdata$game_date, "%x") #error but still works
 str(pdata$game_date)
-pdata2$game_date <- parse_date_time(pdata2$game_date, "%x") #error but still works
+pdata2$game_date <- parse_date_time(pdata2$game_date, "mdY") #error but still works
 str(pdata2$game_date)
 
 #Start time to time format
