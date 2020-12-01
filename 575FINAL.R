@@ -604,3 +604,23 @@ mean(predTrn == redchiTrn$drive_ended_with_score)
 table(pred = predict(rpModel2, redchiTst, type='class'), true=redchiTst$drive_ended_with_score)
 mean(predict(rpModel2, redchiTst, type='class') == redchiTst$drive_ended_with_score)
 
+
+
+
+##### address the label imbalance and do models
+#now for the drive end w score
+library(ROSE)
+chidataredBOTH <- ovun.sample(drive_ended_with_score ~ ., data = chidataRED, method = "both")$data
+table(chidataredBOTH$drive_ended_with_score)
+
+# pass data balance
+PRchidataBOTH <- ovun.sample(pass ~ ., data = PRchidata, method = "both")$data
+table(PRchidataBOTH$pass)
+
+
+#then for field goals
+FGdataBOTH <- ovun.sample(field_goal_result ~ ., data = FGdata, method = "both")$data
+table(FGdataBOTH$field_goal_result)
+
+
+
