@@ -134,7 +134,14 @@ levels(pdata2$start_group2)
 pdata2 <- pdata2 %>% filter(start_group2 !="NA") %>% droplevels()
 
 pdata <- pdata %>% select(-start_time)
-pdata2 <- pdata2 %>% select(-start_time)# make chicago df
+pdata2 <- pdata2 %>% select(-start_time)
+pdata2$start_group <- pdata2$start_group2
+pdata2 <- pdata2 %>% select(-start_group2)
+
+pdataCOMB <- rbind(pdata, pdata2)
+
+
+# make chicago df
 chidata <- pdata[grep("CHI", pdata$posteam), ]
 head(chidata)
 
