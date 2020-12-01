@@ -149,6 +149,7 @@ head(chidata)
 chid <- which(chidata$drive_inside20==1)
 chidataRED <- chidata[chid, ]
 chidataRED$drive_ended_with_score <- na.omit(chidataRED$drive_ended_with_score)
+chidataRED <- chidataRED %>% filter(drive_ended_with_score !="NA") %>% droplevels()
 summary(chidataRED$drive_ended_with_score)  #label imbalance
 
 # using the combined df for chicago data
