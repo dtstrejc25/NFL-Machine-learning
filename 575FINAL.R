@@ -156,6 +156,12 @@ summary(chidataRED$drive_ended_with_score)  #label imbalance
 chidataCOMB <- pdataCOMB[grep("CHI", pdataCOMB$posteam), ]
 dim(chidataCOMB)  #2701 rows
 
+## PR chi data
+Pchidata <- chidataCOMB[grep("pass", chidataCOMB$play_type), ]
+Rchidata <- chidataCOMB[grep("run", chidataCOMB$play_type), ]
+PRchidataCOMB <- rbind(Pchidata, Rchidata)
+dim(PRchidataCOMB) #2705
+
 #for outcome 2--- make new df w just that in the redzone
 chid <- which(chidataCOMB$drive_inside20==1)
 chidataREDCOMB <- chidataCOMB[chid, ]
