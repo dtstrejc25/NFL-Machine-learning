@@ -628,7 +628,7 @@ mean(predict(rpModel2, redchiTst, type='class') == redchiTst$drive_ended_with_sc
 
 
 
-##### address the label imbalance and do models
+##### address the label imbalance
 #now for the drive end w score
 library(ROSE)
 chidataredBOTH <- ovun.sample(drive_ended_with_score ~ ., data = chidataRED, method = "both")$data
@@ -638,10 +638,13 @@ table(chidataredBOTH$drive_ended_with_score)
 PRchidataBOTH <- ovun.sample(pass ~ ., data = PRchidata, method = "both")$data
 table(PRchidataBOTH$pass)
 
+########## now for the combined years #########
+chidataredB_COM <- ovun.sample(drive_ended_with_score ~ ., data = chidataREDCOMB, method = "both")$data
+table(chidataredB_COM$drive_ended_with_score)
 
-#then for field goals
-FGdataBOTH <- ovun.sample(field_goal_result ~ ., data = FGdata, method = "both")$data
-table(FGdataBOTH$field_goal_result)
+# pass data balance
+PRchidataB_COM <- ovun.sample(pass ~ ., data = PRchidataCOMB, method = "both")$data
+table(PRchidataB_COM$pass)
 
 
 
