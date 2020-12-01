@@ -1,5 +1,8 @@
 ### code 575 final ###
-
+library(ranger)
+library(rpart)
+library(rpart.plot)
+library(e1071)
 #filter out the rows to only have those that include the bears
 # import it however you do sorry that's not included here
 pdata <- Play_By_Play_2019_Proposal
