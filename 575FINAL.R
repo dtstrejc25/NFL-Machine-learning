@@ -51,31 +51,38 @@ pdata2 <- pdata2 %>% select(-m)
 colnames(pdata)
 
 
+############## Update columns for inside games wind/temperature (65 set to average inside stadium temperature ################
 pdata <- pdata %>% replace_na(list(temp=65, na.rm=TRUE))
 pdata<- pdata %>% replace_na(list(wind=0, na.rm=TRUE))
 
-pdata <- pdata %>% select(-v2rm)
+pdata2 <- pdata2 %>% replace_na(list(temp=65, na.rm=TRUE))
+pdata2<- pdata2 %>% replace_na(list(wind=0, na.rm=TRUE))
 
+pdata <- pdata %>% select(-v2rm) #check that both dfs have 43 cols
 
 # model 1 - pass or run
 #model 2 - redzone score or not
-# model 3 - punt on down 4 or go for it
+
 
 pdata <- pdata %>% filter(posteam !="NA")
+pdata2 <- pdata2 %>% filter(posteam !="NA")
 
 ##### making the variables factor ########
 names <- c('shotgun', "no_huddle", "posteam",'posteam_type', "defteam", "sp", "qtr",
            "down", "play_type", "goal_to_go", "field_goal_result", "punt_blocked", "fourth_down_converted", "fourth_down_failed",
-            "pass", "touchdown", "pass_touchdown", "rush_touchdown", "rush",
+           "pass", "touchdown", "pass_touchdown", "rush_touchdown", "rush",
            "punt_attempt", "special", "drive_inside20", 
-            "div_game", "roof", "surface", "drive_ended_with_score", "home_team", "away_team")
+           "div_game", "roof", "surface", "drive_ended_with_score", "home_team", "away_team")
 
 pdata[,names] <- lapply(pdata[,names], factor)
+pdata2[,names] <- lapply(pdata2[,names], factor)
+
 
 nums <- c("yardline_100", "quarter_seconds_remaining", "half_seconds_remaining", "game_seconds_remaining", "yards_gained",
           "temp", "wind", "series")
 
 pdata[,nums] <- lapply(pdata[,nums], as.numeric)
+pdata2[,nums] <- lapply(pdata2[,nums], as.numeric)
 
 
 #### convert our dates ########
@@ -83,23 +90,40 @@ pdata[,nums] <- lapply(pdata[,nums], as.numeric)
 library(lubridate)
 pdata$game_date <- parse_date_time(pdata$game_date, "%x") #error but still works
 str(pdata$game_date)
+pdata2$game_date <- parse_date_time(pdata2$game_date, "%x") #error but still works
+str(pdata2$game_date)
 
 #Start time to time format
 pdata$start_time <- str_remove(pdata$start_time, "1899-12-31")
 summary(pdata$start_time)
 
 pdata$start_time <- c(as.numeric(pdata$start_time))
-pdata$start_time <- format(as.POSIXct((pdata$start_time) * 86400, origin = "1970-01-01", tz = "UTC"), "%H:%M:%S")
+pdata$start_time <- format(as.POSIXct((pdata$start_time) * 86400, origin = "1970-01-01", tz = "UTC"), 
+                           "%H:%M:%S")
+
+pdata2$start_time <- parse_date_time((pdata2$start_time), "%H:%M:%S")
+
+table(pdata2$start_time)
 table(pdata$start_time)
 
 start_group <- ifelse(pdata$start_time == "09:29:59" | pdata$start_time == "12:29:59" | pdata$start_time == "13:00:00" | pdata$start_time == "13:05:00",  "First Slate", 
-               ifelse(pdata$start_time == "15:04:59" | pdata$start_time == "16:05:00" | pdata$start_time == "16:25:00" | pdata$start_time == "16:30:00" | pdata$start_time == "16:34:59" | pdata$start_time == "16:40:00", "Second Slate",
-               ifelse(pdata$start_time == "18:29:59" | pdata$start_time == "18:40:00" | pdata$start_time == "19:10:00" | pdata$start_time == "20:15:00" | pdata$start_time == "20:19:59" | pdata$start_time == "22:19:59", "Prime Time", "NA")))     
-
+                      ifelse(pdata$start_time == "15:04:59" | pdata$start_time == "16:05:00" | pdata$start_time == "16:25:00" | pdata$start_time == "16:30:00" | pdata$start_time == "16:34:59" | pdata$start_time == "16:40:00", "Second Slate",
+                             ifelse(pdata$start_time == "18:29:59" | pdata$start_time == "18:40:00" | pdata$start_time == "19:10:00" | pdata$start_time == "20:15:00" | pdata$start_time == "20:19:59" | pdata$start_time == "22:19:59", "Prime Time", "NA")))     
 table(start_group)
 pdata <- cbind(pdata, start_group)
 pdata$start_group <- as.factor(pdata$start_group)
 levels(pdata$start_group)
+
+start_group2 <- ifelse(pdata2$start_time == "09:30:00" | pdata2$start_time == "12:30:00" | pdata2$start_time == "13:00:00" | pdata2$start_time == "13:05:00",  "First Slate", 
+                      ifelse(pdata2$start_time == "15:05:00" | pdata2$start_time == "16:05:00" | pdata2$start_time == "16:25:00" | pdata2$start_time == "16:30:00" | pdata2$start_time == "16:35:00" | pdata2$start_time == "16:40:00", "Second Slate",
+                             ifelse(pdata2$start_time == "18:30:00" | pdata2$start_time == "18:40:00" | pdata2$start_time == "19:10:00" | pdata2$start_time == "20:15:00" | pdata2$start_time == "20:20:00" | pdata2$start_time == "22:22:00", "Prime Time", "NA")))     
+
+pdata2$start_time
+
+table(start_group2)
+pdata <- cbind(pdata2, start_group2)
+pdata2$start_group2 <- as.factor(pdata2$start_group2)
+levels(pdata2$start_group2)
 
 # make chicago df
 chidata <- pdata[grep("CHI", pdata$posteam), ]
