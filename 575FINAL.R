@@ -167,15 +167,7 @@ Rchidata <- chidata[grep("run", chidata$play_type), ]
 PRchidata <- rbind(Pchidata, Rchidata)
 dim(PRchidata)
 
-#test/train split
-TRG_PCT=0.7
-nr=nrow(PRchidata)
-trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
-
-PRchiTrn=PRchidata[trnIndex,]   #training data with the randomly selected row-indices
-PRchiTst = PRchidata[-trnIndex,]
-
-
+########################################## main models #################################
 #test/train split
 TRG_PCT=0.7
 nr=nrow(PRchidata)
@@ -187,13 +179,16 @@ PRchiTst = PRchidata[-trnIndex,]
 
 ## model 1 ##
 #to include
-m1subset= select(PRchiTrn, -c("game_id", "home_team", "away_team", "sp", "field_goal_result", "rush", "play_type",
-                               "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
-                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun", "yards_gained",
-                               "start_time", "defteam"))  # temp gonna be in it once we fix 
+m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "field_goal_result", "rush", "play_type",
+                              "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
+                              "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun", "yards_gained",
+                              "start_time", "defteam", "ydsnet", "time_of_day", "series_success"))  # temp gonna be in it once we fix 
 
 
 library(ranger)
+library(rpart)
+library(rpart.plot)
+
 # get the sheet and do the model with that
 rpModel1=rpart(pass ~ ., data=m1subset, method= "class", 
                parms = list(split = "information"), 
