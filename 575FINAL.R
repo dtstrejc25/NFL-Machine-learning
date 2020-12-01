@@ -248,9 +248,7 @@ PRchiTst = PRchidata[-trnIndex,]
 m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "field_goal_result", "rush", "play_type",
                               "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun", "yards_gained",
-                              "defteam", "ydsnet", "series_success"))  
-
-
+                              "defteam", "ydsnet", "series_success", "no_score_prob"))  
 
 
 library(ranger)
