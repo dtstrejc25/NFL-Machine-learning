@@ -71,6 +71,8 @@ pdata <- pdata %>% select(-v2rm)
 
 pdata <- pdata %>% filter(posteam !="NA")
 pdata2 <- pdata2 %>% filter(posteam !="NA")
+pdata <- pdata %>% filter(series !="NA")
+pdata2 <- pdata2 %>% filter(series !="NA")
 
 ##### making the variables factor ########
 names <- c('shotgun', "no_huddle", "posteam",'posteam_type', "defteam", "sp", "qtr",
