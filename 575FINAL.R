@@ -597,3 +597,39 @@ pred2 <- predict(mod2_glm, newdata = redchiTst)
 pred_class2 <- as.factor(ifelse(pred2 >= 0.5, "1", "0"))
 library(caret)
 confusionMatrix(pred_class2, redchiTst$drive_ended_with_score)
+
+###################GLM For Model 1 with 2018 data###################
+Pchidata <- chidata2[grep("pass", chidata2$play_type), ]
+Rchidata <- chidata2[grep("run", chidata2$play_type), ]
+PRchidata2 <- rbind(Pchidata, Rchidata)
+dim(PRchidata2) #1057
+
+TRG_PCT=0.7
+nr=nrow(PRchidata2)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+PRchiTrn2=PRchidata2[trnIndex,]   #training data with the randomly selected row-indices
+PRchiTst2 = PRchidata2[-trnIndex,]
+
+m1subset2 = select(PRchiTrn2, -c("home_team", "away_team", "sp", "field_goal_result", "rush", "play_type",
+                                      "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
+                                      "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun", "yards_gained",
+                                      "defteam", "ydsnet", "series_success", "no_score_prob", "start_group", "posteam"))  
+
+summary(m1subset2)
+mod1_play_type2 <- glm(pass ~ week + yardline_100 + quarter_seconds_remaining + half_seconds_remaining + game_seconds_remaining +
+                           half_seconds_remaining + game_seconds_remaining + qtr + down + goal_to_go + ydstogo + no_huddle + series +
+                           drive_inside20 +div_game +roof + surface, data = m1subset2, family = "binomial")
+
+full_model <- mod1_play_type2
+null_model <- glm(pass ~ 1, data = m1subset2, family = "binomial")
+step(null_model, scope = list(lower = null_model, upper = full_model), direction = "both")
+
+mod1_glm2 <- glm(pass ~ down + ydstogo + surface + no_huddle + drive_inside20 + roof + goal_to_go, family = "binomial", data = m1subset2)
+
+#Test Accuracy
+PRchiTst2 <- PRchiTst2 %>% filter(down !="NA")
+pred <- predict(mod1_glm2, newdata = PRchiTst2)
+pred_class <- as.factor(ifelse(pred >= 0.5, "1", "0"))
+library(caret)
+confusionMatrix(pred_class, PRchiTst2$pass)
