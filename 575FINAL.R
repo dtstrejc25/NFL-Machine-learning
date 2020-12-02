@@ -325,7 +325,8 @@ redchiTst = chidataRED[-trnIndex, ]
 
 m2subset= select(redchiTrn, -c("home_team", "away_team", "sp", "game_date", "posteam_type", "no_score_prob"
                                ,"special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
-                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "ydsnet", "drive_inside20"))
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "ydsnet", 
+                                "yardline_100","play_type","pass","rush" ,"drive_inside20", "goal_to_go"))
 
 
 
@@ -396,3 +397,110 @@ table(chidataredBOTH2$drive_ended_with_score)
 PRchidataBOTH2 <- ovun.sample(pass ~ ., data = PRchidata2, method = "both")$data
 table(PRchidataBOTH2$pass)
 
+
+
+
+
+
+
+
+
+###################### REDZONE ########################################
+#test/train split--- 334 rows- is this enough?
+TRG_PCT=0.75
+nr=nrow(chidataRED)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+redchiTrn=chidataRED[trnIndex,]   #training data with the randomly selected row-indices
+redchiTst = chidataRED[-trnIndex, ]
+
+m2subset= select(redchiTrn, -c("home_team", "away_team", "sp", "game_date", "posteam_type", "no_score_prob"
+                               ,"special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "ydsnet", "drive_inside20"))
+
+###### svm code 2019 #########
+colMeans(is.na(m2subset))[colMeans(is.na(m2subset))>0]
+
+system.time(svm_tune <-tune(svm, as.factor(drive_ended_with_score) ~., data = m2subset,
+                            kernel="radial", ranges = list( cost=c(0.1,.5,1,10), gamma = c(0.5,1,2,5))))
+
+
+#Check performance for different tuned parameters
+svm_tune$performances
+#Best model
+svm_tune$best.parameters
+svm_tune$best.model
+
+#using the best--- what is the output
+pp<-predict(svm_tune$best.model, redchiTrn)
+table(actual= redchiTrn$drive_ended_with_score, predicted= pp)
+
+revDTM_predTst_svm_best<-predict(svm_tune$best.model, redchiTst)
+table(actual= redchiTst$drive_ended_with_score, predicted= revDTM_predTst_svm_best)
+
+###### svm code FOR COMBINED DF #########
+
+TRG_PCT=0.75
+nr=nrow(chidataREDCOMB)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+redchiTrn=chidataREDCOMB[trnIndex,]   #training data with the randomly selected row-indices
+redchiTst = chidataREDCOMB[-trnIndex, ]
+
+
+m2subset= select(redchiTrn, -c("home_team", "away_team", "sp", "game_date", "posteam_type", "no_score_prob"
+                               ,"special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "ydsnet", "drive_inside20"))
+
+
+colMeans(is.na(redchiTrn))[colMeans(is.na(redchiTrn))>0]
+system.time(svm_tune <-tune(svm, as.factor(drive_ended_with_score) ~., data = m2subset,
+                            kernel="radial", ranges = list( cost=c(0.1,.5,1,10), gamma = c(0.5,1,2,5))))
+
+
+#Check performance for different tuned parameters
+svm_tune$performances
+#Best model
+svm_tune$best.parameters
+svm_tune$best.model
+
+#using the best--- what is the output
+pp<-predict(svm_tune$best.model, redchiTrn)
+table(actual= redchiTrn$drive_ended_with_score, predicted= pp)
+
+revDTM_predTst_svm_best<-predict(svm_tune$best.model, redchiTst)
+table(actual= redchiTst$drive_ended_with_score, predicted= revDTM_predTst_svm_best)
+
+
+###### svm code FOR 2018 DF #########
+TRG_PCT=0.75
+nr=nrow(chidataRED2)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+redchiTrn=chidataRED2[trnIndex,]   #training data with the randomly selected row-indices
+redchiTst = chidataRED2[-trnIndex, ]
+
+m2subset= select(redchiTrn, -c("home_team", "away_team", "sp", "game_date", "posteam_type", "no_score_prob"
+                               ,"special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "ydsnet", "drive_inside20"))
+
+
+
+colMeans(is.na(m2subset))[colMeans(is.na(m2subset))>0]
+
+system.time(svm_tune <-tune(svm, as.factor(drive_ended_with_score) ~., data = m2subset,
+                            kernel="radial", ranges = list( cost=c(0.1,.5,1,10), gamma = c(0.5,1,2,5))))
+
+
+#Check performance for different tuned parameters
+svm_tune$performances
+#Best model
+svm_tune$best.parameters
+svm_tune$best.model
+
+#using the best--- what is the output
+pp<-predict(svm_tune$best.model, redchiTrn)
+table(actual= redchiTrn$drive_ended_with_score, predicted= pp)
+
+revDTM_predTst_svm_best<-predict(svm_tune$best.model, redchiTst)
+table(actual= redchiTst$drive_ended_with_score, predicted= revDTM_predTst_svm_best)
