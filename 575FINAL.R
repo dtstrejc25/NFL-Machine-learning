@@ -173,7 +173,25 @@ chidataREDCOMB$drive_ended_with_score <- na.omit(chidataREDCOMB$drive_ended_with
 dim(chidataREDCOMB)  #1035
 
 
+################## 2018 datasets ############
+# using the combined df for chicago data
+# make chicago df
+chidata2 <- pdata2[grep("CHI", pdata2$posteam), ]
+dim(chidata2)  #1267 rows
 
+## PR chi data
+Pchidata <- chidata2[grep("pass", chidata2$play_type), ]
+Rchidata <- chidata2[grep("run", chidata2$play_type), ]
+PRchidata2 <- rbind(Pchidata, Rchidata)
+dim(PRchidata2) #1057
+
+#for outcome 2--- make new df w just that in the redzone
+chid <- which(chidata2$drive_inside20==1)
+chidataRED2 <- chidata2[chid, ]
+chidataRED2 <- chidataRED2 %>% filter(drive_ended_with_score !="NA") %>% droplevels()
+summary(chidataRED2$drive_ended_with_score)  #490
+
+####### division data for 2019-- make the other 2 if you want 
 gbdata <- pdata[grep("GB", pdata$posteam), ]
 head(gbdata)
 
@@ -371,4 +389,10 @@ table(PRchidataB_COM$pass)
 
 ######### then for 2018
 
+chidataredBOTH2 <- ovun.sample(drive_ended_with_score ~ ., data = chidataRED2, method = "both")$data
+table(chidataredBOTH2$drive_ended_with_score)
+
+# pass data balance
+PRchidataBOTH2 <- ovun.sample(pass ~ ., data = PRchidata2, method = "both")$data
+table(PRchidataBOTH2$pass)
 
