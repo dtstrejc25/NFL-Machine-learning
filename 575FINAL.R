@@ -504,3 +504,26 @@ table(actual= redchiTrn$drive_ended_with_score, predicted= pp)
 
 revDTM_predTst_svm_best<-predict(svm_tune$best.model, redchiTst)
 table(actual= redchiTst$drive_ended_with_score, predicted= revDTM_predTst_svm_best)
+
+
+################# GLM Model 1 with Combined Data ##############################
+#GLM for Model 1, rush or pass with combined data
+summary(m1subsetCom)
+m1subsetCom$time_of_day <- as.factor(m1subsetCom$time_of_day)
+mod1_play_typeCom <- glm(pass ~ week + yardline_100 + game_date + quarter_seconds_remaining + half_seconds_remaining + game_seconds_remaining +
+                        half_seconds_remaining + game_seconds_remaining + qtr + down + goal_to_go + ydstogo + no_huddle + series +
+                        drive_inside20 +div_game +roof + surface + start_group, data = m1subsetCom, family = "binomial")
+
+full_model <- mod1_play_typeCom
+null_model <- glm(pass ~ 1, data = m1subsetCom, family = "binomial")
+step(null_model, scope = list(lower = null_model, upper = full_model), direction = "both")
+
+mod1_glmCom <- glm(pass ~ down + ydstogo + no_huddle + quarter_seconds_remaining + surface, family = "binomial", data = m1subsetCom)
+
+#Test Accuracy
+PRchiTstCOMB <- PRchiTstCOMB %>% filter(down !="NA")
+pred <- predict(mod1_glmCom, newdata = PRchiTstCOMB)
+pred_class <- as.factor(ifelse(pred >= 0.5, "1", "0"))
+library(caret)
+confusionMatrix(pred_class, PRchiTstCOMB$pass)
+
