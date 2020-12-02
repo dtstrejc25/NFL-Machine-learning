@@ -305,9 +305,9 @@ trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
 redchiTrn=chidataRED[trnIndex,]   #training data with the randomly selected row-indices
 redchiTst = chidataRED[-trnIndex, ]
 
-m2subset= select(redchiTrn, -c("home_team", "away_team", "sp", "game_date", "posteam_type"
+m2subset= select(redchiTrn, -c("home_team", "away_team", "sp", "game_date", "posteam_type", "no_score_prob"
                                ,"special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
-                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "ydsnet", "drive_inside20")) 
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "ydsnet", "drive_inside20"))
 
 
 
