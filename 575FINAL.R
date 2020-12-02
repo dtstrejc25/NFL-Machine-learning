@@ -44,7 +44,7 @@ v2rm <- c("play_id","game_id","old_game_id","season_type","game_half","quarter_e
           ,"first_down_pass","order_sequence","weather","nfl_api_id","end_clock_time","drive_real_start_time","drive_play_count"
           ,"drive_time_of_possession","drive_first_downs","away_score","home_score","location","result","total","spread_line","total_line"
           ,"stadium_id","success","play", "play_type_nfl", "side_of_field", "drive_start_yard_line", "drive_end_yard_line", "end_yard_line", "rush_attempt", "pass_attempt",
-          "special_teams_play", "penalty_player_name","home_coach","away_coach","passer","rusher","receiver", "yrdln", "cp", "cpoe", "fg_prob", "time_of_day", "field_goal_result")
+          "special_teams_play", "penalty_player_name","home_coach","away_coach","passer","rusher","receiver", "yrdln", "cp", "cpoe", "fg_prob", "time_of_day", "field_goal_result", "yards_gained", "series_success")
 
 pdata2 <- Play_By_Play_2018 %>% select(-v2rm)
 m <- c("fixed_drive", "fixed_drive_result", "passer_jersey_number", "passer_jersey_number", "jersey_number",
