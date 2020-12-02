@@ -86,8 +86,8 @@ pdata[,names] <- lapply(pdata[,names], factor)
 pdata2[,names] <- lapply(pdata2[,names], factor)
 
 
-nums <- c("yardline_100", "quarter_seconds_remaining", "half_seconds_remaining", "game_seconds_remaining", "yards_gained",
-          "temp", "wind", "series", "ydsnet")
+nums <- c("yardline_100", "quarter_seconds_remaining", "half_seconds_remaining", "game_seconds_remaining",
+          "temp", "wind", "series", "ydsnet", "score_differential")
 
 pdata[,nums] <- lapply(pdata[,nums], as.numeric)
 pdata2[,nums] <- lapply(pdata2[,nums], as.numeric)
