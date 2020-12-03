@@ -633,3 +633,118 @@ pred <- predict(mod1_glm2, newdata = PRchiTst2)
 pred_class <- as.factor(ifelse(pred >= 0.5, "1", "0"))
 library(caret)
 confusionMatrix(pred_class, PRchiTst2$pass)
+
+####################### RF models ##############
+##################### model 2 ############################ RZ score y or no
+#test/train split--- 356 rows- is this enough?
+TRG_PCT=0.75
+nr=nrow(chidataRED)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+redchiTrn=chidataRED[trnIndex,]   #training data with the randomly selected row-indices
+redchiTst19 = chidataRED[-trnIndex, ]
+
+m2subset= select(redchiTrn, -c("home_team", "away_team", "sp", "game_date", "posteam_type", "no_score_prob"
+                               ,"special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "ydsnet", 
+                               "yardline_100","play_type","pass","rush" ,"drive_inside20", "goal_to_go"))
+
+
+rpModel219=rpart(drive_ended_with_score ~ ., data=m2subset, method= "class", 
+               parms = list(split = "information"), 
+               control = rpart.control(minsplit = 30), na.action=na.omit)
+
+# plotting the tree
+rpModel219$variable.importance
+rpart.plot::prp(rpModel219, type=2, extra=100)
+
+# train and test accuracy??
+predTrn=predict(rpModel219, redchiTrn, type='class')
+table(pred = predTrn, true=redchiTrn$drive_ended_with_score)
+mean(predTrn == redchiTrn$drive_ended_with_score)
+table(pred = predict(rpModel219, redchiTst19, type='class'), true=redchiTst19$drive_ended_with_score)
+mean(predict(rpModel219, redchiTst19, type='class') == redchiTst19$drive_ended_with_score)
+
+##################### 2018 ############################ RZ score y or no
+##################### model 2 ############################ RZ score y or no
+#test/train split--- 356 rows- is this enough?
+TRG_PCT=0.75
+nr=nrow(chidataRED2)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+redchiTrn=chidataRED2[trnIndex,]   #training data with the randomly selected row-indices
+redchiTst18 = chidataRED2[-trnIndex, ]
+
+m2subset= select(redchiTrn, -c("home_team", "away_team", "sp", "game_date", "posteam_type", "no_score_prob"
+                               ,"special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "ydsnet", 
+                               "yardline_100","play_type","pass","rush" ,"drive_inside20", "goal_to_go"))
+
+
+rpModel218=rpart(drive_ended_with_score ~ ., data=m2subset, method= "class", 
+               parms = list(split = "information"), 
+               control = rpart.control(minsplit = 30), na.action=na.omit)
+
+# plotting the tree
+rpModel2$variable.importance
+rpart.plot::prp(rpModel218, type=2, extra=100)
+
+# train and test accuracy??
+predTrn=predict(rpModel218, redchiTrn, type='class')
+table(pred = predTrn, true=redchiTrn$drive_ended_with_score)
+mean(predTrn == redchiTrn$drive_ended_with_score)
+table(pred = predict(rpModel218, redchiTst18, type='class'), true=redchiTst18$drive_ended_with_score)
+mean(predict(rpModel218, redchiTst18, type='class') == redchiTst18$drive_ended_with_score)
+
+##################### COMBINED DF model 2 ############################ RZ score y or no
+
+TRG_PCT=0.75
+nr=nrow(chidataREDCOMB)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+redchiTrn=chidataREDCOMB[trnIndex,]   #training data with the randomly selected row-indices
+redchiTst = chidataREDCOMB[-trnIndex, ]
+
+m2subset= select(redchiTrn, -c("home_team", "away_team", "sp", "game_date", "posteam_type", "no_score_prob"
+                               ,"special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "ydsnet", 
+                               "yardline_100","play_type","pass","rush" ,"drive_inside20", "goal_to_go"))
+
+
+rpModel2=rpart(drive_ended_with_score ~ ., data=m2subset, method= "class", 
+               parms = list(split = "information"), 
+               control = rpart.control(minsplit = 30), na.action=na.omit)
+
+# plotting the tree
+rpModel2$variable.importance
+rpart.plot::prp(rpModel2, type=2, extra=100)
+
+# train and test accuracy??
+predTrn=predict(rpModel2, redchiTrn, type='class')
+table(pred = predTrn, true=redchiTrn$drive_ended_with_score)
+mean(predTrn == redchiTrn$drive_ended_with_score)
+table(pred = predict(rpModel2, redchiTst, type='class'), true=redchiTst$drive_ended_with_score)
+mean(predict(rpModel2, redchiTst, type='class') == redchiTst$drive_ended_with_score)
+
+
+#####################3 making PR curves all on one plot #######
+score <- predict(rpModel218, redchiTst18)
+score1<-score[,2]
+pred <- prediction(score1, redchiTst18$drive_ended_with_score)
+score <- predict(rpModel219, redchiTst19)
+score1<-score[,2]
+pred2 <- prediction(score1, redchiTst19$drive_ended_with_score)
+score <- predict(rpModel2, redchiTst)
+score1<-score[,2]
+pred3 <- prediction(score1, redchiTst$drive_ended_with_score)
+
+
+perf <- performance(pred, "tpr", "fpr" )
+perf2 <- performance(pred2, "tpr", "fpr")
+perf3 <- performance(pred3, "tpr", "fpr")
+
+
+plot(perf, main="RZ model 2018 and 2019", col = as.list(1:10))
+plot(perf2, add = TRUE, col = "red")
+plot(perf3, add = TRUE, col = "green")
+
