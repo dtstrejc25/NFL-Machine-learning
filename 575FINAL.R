@@ -728,25 +728,28 @@ mean(predict(rpModel2, redchiTst, type='class') == redchiTst$drive_ended_with_sc
 
 
 #####################3 making PR curves all on one plot #######
-score <- predict(rpModel218, redchiTst18)
+score <- predict(rpModel19, PRchiTst19)
 score1<-score[,2]
-pred <- prediction(score1, redchiTst18$drive_ended_with_score)
-score <- predict(rpModel219, redchiTst19)
+pred <- prediction(score1, PRchiTst19$pass)
+
+score <- predict(rpModel18, PRchiTst18)
 score1<-score[,2]
-pred2 <- prediction(score1, redchiTst19$drive_ended_with_score)
-score <- predict(rpModel2, redchiTst)
+pred2 <- prediction(score1, PRchiTst18$pass)
+
+score <- predict(rpModel1, PRchiTst)
 score1<-score[,2]
-pred3 <- prediction(score1, redchiTst$drive_ended_with_score)
+pred3 <- prediction(score1, PRchiTst$pass)
+
+perf <- performance(pred, "prec", "rec")
+perf2 <- performance(pred2, "prec", "rec")
+perf3 <- performance(pred3, "prec", "rec")
 
 
-perf <- performance(pred, "tpr", "fpr" )
-perf2 <- performance(pred2, "tpr", "fpr")
-perf3 <- performance(pred3, "tpr", "fpr")
-
-
-plot(perf, main="RZ model 2018 and 2019", col = as.list(1:10))
+plot(perf, main="PR model", col = "black", ylim=c(0,1))
 plot(perf2, add = TRUE, col = "red")
 plot(perf3, add = TRUE, col = "green")
+legend(0.4, .51, legend=c("2019", "2018", "Combined"),
+       col=c("black","red", "green"), lty=1:2, cex=0.8)
 
 #######GLM Model 1 Combined Balanced
 TRG_PCT=0.7
