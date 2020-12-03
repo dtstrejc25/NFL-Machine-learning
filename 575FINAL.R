@@ -748,3 +748,246 @@ plot(perf, main="RZ model 2018 and 2019", col = as.list(1:10))
 plot(perf2, add = TRUE, col = "red")
 plot(perf3, add = TRUE, col = "green")
 
+#######GLM Model 1 Combined Balanced
+TRG_PCT=0.7
+nr=nrow(PRchidataB_COM)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+PRchiTrn=PRchidataB_COM[trnIndex,]   #training data with the randomly selected row-indices
+PRchiTst = PRchidataB_COM[-trnIndex,]
+
+m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "field_goal_result", "rush", "play_type",
+                               "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun", "yards_gained",
+                               "defteam", "ydsnet", "series_success", "no_score_prob"))  
+
+mod1_play_type <- glm(pass ~ week + yardline_100 + game_date + quarter_seconds_remaining + half_seconds_remaining + game_seconds_remaining +
+                        half_seconds_remaining + game_seconds_remaining + qtr + down + goal_to_go + ydstogo + no_huddle + series +
+                        drive_inside20 +div_game +roof + surface + start_group, data = m1subset, family = "binomial")
+
+full_model <- mod1_play_type
+null_model <- glm(pass ~ 1, data = m1subset, family = "binomial")
+step(null_model, scope = list(lower = null_model, upper = full_model), direction = "both")
+
+mod1_glm <- glm(pass ~ down + ydstogo + no_huddle + qtr + quarter_seconds_remaining + goal_to_go + drive_inside20 + yardline_100 + div_game, family = "binomial", data = m1subset)
+
+#Test Accuracy
+PRchiTst <- PRchiTst %>% filter(down !="NA")
+PRchiTst$pass <- ordered(PRchiTst$pass, c("0", "1"))
+pred <- predict(mod1_glm, newdata = PRchiTst)
+pred_class <- as.factor(ifelse(pred >= 0.5, "1", "0"))
+library(caret)
+confusionMatrix(pred_class, PRchiTst$pass)
+levels(pred_class)
+levels(PRchiTst$pass)
+
+#######GLM Combined Balance
+TRG_PCT=0.7
+nr=nrow(PRchidataB_COM)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+PRchiTrn=PRchidataB_COM[trnIndex,]   #training data with the randomly selected row-indices
+PRchiTst = PRchidataB_COM[-trnIndex,]
+
+m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "field_goal_result", "rush", "play_type",
+                               "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun", "yards_gained",
+                               "defteam", "ydsnet", "series_success", "no_score_prob"))  
+
+mod1_play_type <- glm(pass ~ week + yardline_100 + game_date + quarter_seconds_remaining + half_seconds_remaining + game_seconds_remaining +
+                        half_seconds_remaining + game_seconds_remaining + qtr + down + goal_to_go + ydstogo + no_huddle + series +
+                        drive_inside20 +div_game +roof + surface + start_group, data = m1subset, family = "binomial")
+
+full_model <- mod1_play_type
+null_model <- glm(pass ~ 1, data = m1subset, family = "binomial")
+step(null_model, scope = list(lower = null_model, upper = full_model), direction = "both")
+
+mod1_glm <- glm(pass ~ down + ydstogo + no_huddle + qtr + quarter_seconds_remaining + goal_to_go + drive_inside20 + yardline_100 + div_game, family = "binomial", data = m1subset)
+
+#Test Accuracy
+PRchiTst <- PRchiTst %>% filter(down !="NA")
+PRchiTst$pass <- ordered(PRchiTst$pass, c("0", "1"))
+pred <- predict(mod1_glm, newdata = PRchiTst)
+pred_class <- as.factor(ifelse(pred >= 0.5, "1", "0"))
+library(caret)
+confusionMatrix(pred_class, PRchiTst$pass)
+levels(pred_class)
+levels(PRchiTst$pass)
+
+########GLM Model 1 2019 Label Balance
+PRchidataBOTH <- ovun.sample(pass ~ ., data = PRchidata, method = "both")$data
+table(PRchidataBOTH$pass)
+nr=nrow(PRchidataBOTH)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+PRchiTrn=PRchidataBOTH[trnIndex,]   #training data with the randomly selected row-indices
+PRchiTst = PRchidataBOTH[-trnIndex,]
+
+m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "field_goal_result", "rush", "play_type",
+                               "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun", "yards_gained",
+                               "defteam", "ydsnet", "series_success", "no_score_prob"))  
+
+mod1_play_type <- glm(pass ~ week + yardline_100 + game_date + quarter_seconds_remaining + half_seconds_remaining + game_seconds_remaining +
+                        half_seconds_remaining + game_seconds_remaining + qtr + down + goal_to_go + ydstogo + no_huddle + series +
+                        drive_inside20 +div_game +roof + surface + start_group, data = m1subset, family = "binomial")
+
+full_model <- mod1_play_type
+null_model <- glm(pass ~ 1, data = m1subset, family = "binomial")
+step(null_model, scope = list(lower = null_model, upper = full_model), direction = "both")
+
+mod1_glm <- glm(pass ~ down + ydstogo + no_huddle + quarter_seconds_remaining + drive_inside20 + yardline_100 + start_group + game_date, family = "binomial", data = m1subset)
+
+#Test Accuracy
+PRchiTst <- PRchiTst %>% filter(down !="NA")
+PRchiTst$pass <- ordered(PRchiTst$pass, c("0", "1"))
+pred <- predict(mod1_glm, newdata = PRchiTst)
+pred_class <- as.factor(ifelse(pred >= 0.5, "1", "0"))
+library(caret)
+confusionMatrix(pred_class, PRchiTst$pass)
+levels(pred_class)
+levels(PRchiTst$pass)
+
+######GLM Model 1 2018 Balanced
+PRchidata2 = select(PRchidata2, -c("field_goal_result"))
+summary(PRchidata2)
+PRchidataBOTH2 <- ovun.sample(pass ~ ., data = PRchidata2, method = "both")$data
+table(PRchidataBOTH2$pass)
+
+nr=nrow(PRchidataBOTH2)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+PRchiTrn=PRchidataBOTH2[trnIndex,]   #training data with the randomly selected row-indices
+PRchiTst = PRchidataBOTH2[-trnIndex,]
+
+m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "field_goal_result", "rush", "play_type",
+                               "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun", "yards_gained",
+                               "defteam", "ydsnet", "series_success", "no_score_prob"))  
+
+mod1_play_type <- glm(pass ~ week + yardline_100 + game_date + quarter_seconds_remaining + half_seconds_remaining + game_seconds_remaining +
+                        half_seconds_remaining + game_seconds_remaining + qtr + down + goal_to_go + ydstogo + no_huddle + series +
+                        drive_inside20 +div_game +roof + surface + start_group, data = m1subset, family = "binomial")
+
+full_model <- mod1_play_type
+null_model <- glm(pass ~ 1, data = m1subset, family = "binomial")
+step(null_model, scope = list(lower = null_model, upper = full_model), direction = "both")
+
+mod1_glm <- glm(pass ~ down + ydstogo + no_huddle + quarter_seconds_remaining + drive_inside20 + yardline_100, family = "binomial", data = m1subset)
+
+#Test Accuracy
+PRchiTst <- PRchiTst %>% filter(down !="NA")
+PRchiTst$pass <- ordered(PRchiTst$pass, c("0", "1"))
+pred <- predict(mod1_glm, newdata = PRchiTst)
+pred_class <- as.factor(ifelse(pred >= 0.5, "1", "0"))
+confusionMatrix(pred_class, PRchiTst$pass)
+length(pred_class)
+length(PRchiTst$pass)
+
+
+#######GLM Model 2 2018 data with Balanced###########
+summary(chidataRED2)
+chidataRED2 = select(chidataRED2, -c("game_date"))
+chidataredBOTH2 <- ovun.sample(drive_ended_with_score ~ ., data = chidataRED2, method = "both")$data
+table(chidataredBOTH2$drive_ended_with_score)
+
+TRG_PCT=0.75
+nr=nrow(chidataredBOTH2)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+redchiTrn=chidataredBOTH2[trnIndex,]   #training data with the randomly selected row-indices
+redchiTst = chidataredBOTH2[-trnIndex, ]
+
+m2subset= select(redchiTrn, -c("home_team", "away_team", "sp", "game_date", "posteam_type", "no_score_prob"
+                               ,"special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "ydsnet", "drive_inside20"))
+summary(m2subset)
+str(m2subset$drive_ended_with_score)
+mod2_play_type <- glm(drive_ended_with_score ~ week + yardline_100 + quarter_seconds_remaining + half_seconds_remaining +
+                        game_seconds_remaining + qtr + down + goal_to_go + ydstogo + play_type + yards_gained + shotgun + no_huddle +
+                        series +  div_game + roof + surface + pass + rush, data = m2subset, family = "binomial")
+
+full_model2 <- mod2_play_type
+null_model2 <- glm(drive_ended_with_score ~ 1, data = m2subset, family = "binomial")
+summary(null_model2)
+step(null_model2, scope = list(lower = null_model2, upper = full_model2), direction = "both")
+
+mod2_glm <- glm(drive_ended_with_score ~ roof + pass + shotgun + surface + div_game + rush + quarter_seconds_remaining, family = "binomial", data = m2subset)
+
+#Test Accuracy 
+pred2 <- predict(mod2_glm, newdata = redchiTst)
+pred_class2 <- as.factor(ifelse(pred2 >= 0.5, "1", "0"))
+library(caret)
+confusionMatrix(pred_class2, redchiTst$drive_ended_with_score)
+
+###########GLM Model 2 Combined DF Balanced
+chidataredB_COM <- ovun.sample(drive_ended_with_score ~ ., data = chidataREDCOMB, method = "both")$data
+table(chidataredB_COM$drive_ended_with_score)
+
+TRG_PCT=0.75
+nr=nrow(chidataredB_COM)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+redchiTrn = chidataredB_COM[trnIndex,]   #training data with the randomly selected row-indices
+redchiTst = chidataredB_COM[-trnIndex, ]
+
+m2subset= select(redchiTrn, -c("home_team", "away_team", "sp", "game_date", "posteam_type", "no_score_prob"
+                               ,"special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "ydsnet", "drive_inside20"))
+summary(m2subset)
+str(m2subset$drive_ended_with_score)
+mod2_play_type <- glm(drive_ended_with_score ~ week + yardline_100 + quarter_seconds_remaining + half_seconds_remaining +
+                        game_seconds_remaining + qtr + down + goal_to_go + ydstogo + play_type + yards_gained + shotgun + no_huddle +
+                        series +  div_game + roof + surface + pass + rush, data = m2subset, family = "binomial")
+
+full_model2 <- mod2_play_type
+null_model2 <- glm(drive_ended_with_score ~ 1, data = m2subset, family = "binomial")
+summary(null_model2)
+step(null_model2, scope = list(lower = null_model2, upper = full_model2), direction = "both")
+
+mod2_glm <- glm(drive_ended_with_score ~ qtr + roof + quarter_seconds_remaining + goal_to_go + week + yardline_100 + yards_gained + no_huddle, family = "binomial", data = m2subset)
+
+#Test Accuracy 
+pred2 <- predict(mod2_glm, newdata = redchiTst)
+redchiTst$drive_ended_with_score <- ordered(redchiTst$drive_ended_with_score, c("0", "1"))
+pred_class2 <- as.factor(ifelse(pred2 >= 0.5, "1", "0"))
+library(caret)
+confusionMatrix(pred_class2, redchiTst$drive_ended_with_score)
+levels(pred_class2)
+levels(redchiTst$drive_ended_with_score)
+
+##########GLM Model 2 with 2019 balanced
+chidataredBOTH <- ovun.sample(drive_ended_with_score ~ ., data = chidataRED, method = "both")$data
+table(chidataredBOTH$drive_ended_with_score)
+
+TRG_PCT=0.75
+nr=nrow(chidataredBOTH)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+redchiTrn = chidataredBOTH[trnIndex,]   #training data with the randomly selected row-indices
+redchiTst = chidataredBOTH[-trnIndex, ]
+
+m2subset= select(redchiTrn, -c("home_team", "away_team", "sp", "game_date", "posteam_type", "no_score_prob"
+                               ,"special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "ydsnet", "drive_inside20"))
+summary(m2subset)
+str(m2subset$drive_ended_with_score)
+mod2_play_type <- glm(drive_ended_with_score ~ week + yardline_100 + quarter_seconds_remaining + half_seconds_remaining +
+                        game_seconds_remaining + qtr + down + goal_to_go + ydstogo + play_type + yards_gained + shotgun + no_huddle +
+                        series +  div_game + roof + surface + pass + rush, data = m2subset, family = "binomial")
+
+full_model2 <- mod2_play_type
+null_model2 <- glm(drive_ended_with_score ~ 1, data = m2subset, family = "binomial")
+summary(null_model2)
+step(null_model2, scope = list(lower = null_model2, upper = full_model2), direction = "both")
+
+mod2_glm <- glm(drive_ended_with_score ~ qtr + roof + series + week + no_huddle + yardline_100 + yards_gained + half_seconds_remaining, family = "binomial", data = m2subset)
+
+#Test Accuracy 
+pred2 <- predict(mod2_glm, newdata = redchiTst)
+redchiTst$drive_ended_with_score <- ordered(redchiTst$drive_ended_with_score, c("0", "1"))
+pred_class2 <- as.factor(ifelse(pred2 >= 0.5, "1", "0"))
+library(caret)
+confusionMatrix(pred_class2, redchiTst$drive_ended_with_score)
+levels(pred_class2)
+levels(redchiTst$drive_ended_with_score)
