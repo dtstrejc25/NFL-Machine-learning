@@ -255,44 +255,6 @@ Rchidata <- chidata[grep("run", chidata$play_type), ]
 PRchidata <- rbind(Pchidata, Rchidata)
 dim(PRchidata)
 
-########################################## main models #################################
-#test/train split
-TRG_PCT=0.7
-nr=nrow(PRchidata)
-trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
-
-PRchiTrn=PRchidata[trnIndex,]   #training data with the randomly selected row-indices
-PRchiTst = PRchidata[-trnIndex,]
-
-
-## model 1 ##
-#to include
-m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "rush", "play_type",
-                              "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
-                              "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun",
-                              "defteam", "ydsnet", "no_score_prob"))
- 
-
-
-library(ranger)
-library(rpart)
-library(rpart.plot)
-
-# get the sheet and do the model with that
-rpModel1=rpart(pass ~ ., data=m1subset, method= "class", 
-               parms = list(split = "information"), 
-               control = rpart.control(minsplit = 30), na.action=na.omit)
-
-# plotting the tree
-rpModel1$variable.importance
-rpart.plot::prp(rpModel1, type=2, extra=100)
-
-# train and test accuracy
-predTrn=predict(rpModel1, PRchiTrn, type='class')
-table(pred = predTrn, true=PRchiTrn$pass)
-mean(predTrn == PRchiTrn$pass)
-table(pred = predict(rpModel1, PRchiTst, type='class'), true=PRchiTst$pass)
-mean(predict(rpModel1, PRchiTst, type='class') == PRchiTst$pass)
 
 #GLM for Model 1, rush or pass
 summary(m1subset)
@@ -634,7 +596,8 @@ pred_class <- as.factor(ifelse(pred >= 0.5, "1", "0"))
 library(caret)
 confusionMatrix(pred_class, PRchiTst2$pass)
 
-####################### RF models ##############
+#############################################################################
+####################### RF MODELS #####################################
 ##################### model 2 ############################ RZ score y or no
 #test/train split--- 356 rows- is this enough?
 TRG_PCT=0.75
@@ -697,7 +660,6 @@ table(pred = predict(rpModel218, redchiTst18, type='class'), true=redchiTst18$dr
 mean(predict(rpModel218, redchiTst18, type='class') == redchiTst18$drive_ended_with_score)
 
 ##################### COMBINED DF model 2 ############################ RZ score y or no
-
 TRG_PCT=0.75
 nr=nrow(chidataREDCOMB)
 trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
@@ -715,6 +677,8 @@ rpModel2=rpart(drive_ended_with_score ~ ., data=m2subset, method= "class",
                parms = list(split = "information"), 
                control = rpart.control(minsplit = 30), na.action=na.omit)
 
+summary(m2subset$drive_ended_with_score)
+
 # plotting the tree
 rpModel2$variable.importance
 rpart.plot::prp(rpModel2, type=2, extra=100)
@@ -725,6 +689,316 @@ table(pred = predTrn, true=redchiTrn$drive_ended_with_score)
 mean(predTrn == redchiTrn$drive_ended_with_score)
 table(pred = predict(rpModel2, redchiTst, type='class'), true=redchiTst$drive_ended_with_score)
 mean(predict(rpModel2, redchiTst, type='class') == redchiTst$drive_ended_with_score)
+
+
+
+
+
+
+##############################  MODEL 1 ##############
+#test/train split
+TRG_PCT=0.7
+nr=nrow(PRchidata)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+PRchiTrn=PRchidata[trnIndex,]   #training data with the randomly selected row-indices
+PRchiTst19 = PRchidata[-trnIndex,]
+
+
+## model 1 ##
+#to include
+m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "rush", "play_type",
+                               "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun",
+                               "defteam", "ydsnet", "no_score_prob"))
+
+library(ranger)
+library(rpart)
+library(rpart.plot)
+
+# get the sheet and do the model with that
+rpModel19=rpart(pass ~ ., data=m1subset, method= "class", 
+               parms = list(split = "information"), 
+               control = rpart.control(minsplit = 30), na.action=na.omit)
+
+# plotting the tree
+rpModel19$variable.importance
+rpart.plot::prp(rpModel19, type=2, extra=100)
+
+# train and test accuracy
+predTrn=predict(rpModel19, PRchiTrn, type='class')
+table(pred = predTrn, true=PRchiTrn$pass)
+mean(predTrn == PRchiTrn$pass)
+table(pred = predict(rpModel19, PRchiTst19, type='class'), true=PRchiTst19$pass)
+mean(predict(rpModel19, PRchiTst19, type='class') == PRchiTst19$pass)
+
+############################# 2018 ##########################
+#test/train split
+TRG_PCT=0.7
+nr=nrow(PRchidata2)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+PRchiTrn=PRchidata2[trnIndex,]   #training data with the randomly selected row-indices
+PRchiTst18 = PRchidata2[-trnIndex,]
+
+
+## model 1 ##
+#to include
+m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "rush", "play_type",
+                               "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun",
+                               "defteam", "ydsnet", "no_score_prob"))
+
+library(ranger)
+library(rpart)
+library(rpart.plot)
+
+# get the sheet and do the model with that
+rpModel18=rpart(pass ~ ., data=m1subset, method= "class", 
+               parms = list(split = "information"), 
+               control = rpart.control(minsplit = 30), na.action=na.omit)
+
+# plotting the tree
+rpModel18$variable.importance
+rpart.plot::prp(rpModel18, type=2, extra=100)
+
+# train and test accuracy
+predTrn=predict(rpModel18, PRchiTrn, type='class')
+table(pred = predTrn, true=PRchiTrn$pass)
+mean(predTrn == PRchiTrn$pass)
+table(pred = predict(rpModel18, PRchiTst18, type='class'), true=PRchiTst18$pass)
+mean(predict(rpModel18, PRchiTst18, type='class') == PRchiTst18$pass)
+
+############################# combined ###################
+#test/train split
+TRG_PCT=0.7
+nr=nrow(PRchidataCOMB)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+PRchiTrn=PRchidataCOMB[trnIndex,]   #training data with the randomly selected row-indices
+PRchiTst = PRchidataCOMB[-trnIndex,]
+
+
+## model 1 ##
+#to include
+m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "rush", "play_type",
+                               "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun",
+                               "defteam", "ydsnet", "no_score_prob"))
+
+library(ranger)
+library(rpart)
+library(rpart.plot)
+
+# get the sheet and do the model with that
+rpModel1=rpart(pass ~ ., data=m1subset, method= "class", 
+               parms = list(split = "information"), 
+               control = rpart.control(minsplit = 30), na.action=na.omit)
+
+# plotting the tree
+rpModel1$variable.importance
+rpart.plot::prp(rpModel1, type=2, extra=100)
+
+# train and test accuracy
+predTrn=predict(rpModel1, PRchiTrn, type='class')
+table(pred = predTrn, true=PRchiTrn$pass)
+mean(predTrn == PRchiTrn$pass)
+table(pred = predict(rpModel1, PRchiTst, type='class'), true=PRchiTst$pass)
+mean(predict(rpModel1, PRchiTst, type='class') == PRchiTst$pass)
+
+
+
+########################### balancing the labels ###################
+##############################  MODEL 1 ##############
+#test/train split
+TRG_PCT=0.7
+nr=nrow(PRchidataBOTH)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+PRchiTrn=PRchidataBOTH[trnIndex,]   #training data with the randomly selected row-indices
+PRchiTstB19 = PRchidataBOTH[-trnIndex,]
+
+
+## model 1 ##
+#to include
+m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "rush", "play_type",
+                               "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun",
+                               "defteam", "ydsnet", "no_score_prob"))
+
+
+# get the sheet and do the model with that
+rpModelB19=rpart(pass ~ ., data=m1subset, method= "class", 
+               parms = list(split = "information"), 
+               control = rpart.control(minsplit = 30), na.action=na.omit)
+
+# plotting the tree
+rpModelB19$variable.importance
+rpart.plot::prp(rpModelB19, type=2, extra=100)
+
+# train and test accuracy
+predTrn=predict(rpModelB19, PRchiTrn, type='class')
+table(pred = predTrn, true=PRchiTrn$pass)
+mean(predTrn == PRchiTrn$pass)
+table(pred = predict(rpModelB19, PRchiTstB19, type='class'), true=PRchiTstB19$pass)
+mean(predict(rpModelB19, PRchiTstB19, type='class') == PRchiTstB19$pass)
+
+############################# 2018 ##########################
+#test/train split
+TRG_PCT=0.7
+nr=nrow(PRchidataBOTH2)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+PRchiTrn=PRchidataBOTH2[trnIndex,]   #training data with the randomly selected row-indices
+PRchiTstB18 = PRchidataBOTH2[-trnIndex,]
+
+
+## model 1 ##
+#to include
+m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "rush", "play_type",
+                               "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun",
+                               "defteam", "ydsnet", "no_score_prob"))
+
+# get the sheet and do the model with that
+rpModelB18=rpart(pass ~ ., data=m1subset, method= "class", 
+               parms = list(split = "information"), 
+               control = rpart.control(minsplit = 30), na.action=na.omit)
+
+# plotting the tree
+rpModelB18$variable.importance
+rpart.plot::prp(rpModelB18, type=2, extra=100)
+
+# train and test accuracy
+predTrn=predict(rpModelB18, PRchiTrn, type='class')
+table(pred = predTrn, true=PRchiTrn$pass)
+mean(predTrn == PRchiTrn$pass)
+table(pred = predict(rpModelB18, PRchiTstB18, type='class'), true=PRchiTstB18$pass)
+mean(predict(rpModelB18, PRchiTstB18, type='class') == PRchiTstB18$pass)
+
+############################# combined ###################
+#test/train split
+TRG_PCT=0.7
+nr=nrow(PRchidataB_COM)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+PRchiTrn=PRchidataB_COM[trnIndex,]   #training data with the randomly selected row-indices
+PRchiTstB = PRchidataB_COM[-trnIndex,]
+
+
+## model 1 ##
+#to include
+m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "rush", "play_type",
+                               "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun",
+                               "defteam", "ydsnet", "no_score_prob"))
+
+# get the sheet and do the model with that
+rpModel1B=rpart(pass ~ ., data=m1subset, method= "class", 
+               parms = list(split = "information"), 
+               control = rpart.control(minsplit = 30), na.action=na.omit)
+
+# plotting the tree
+rpModel1B$variable.importance
+rpart.plot::prp(rpModel1B, type=2, extra=100)
+
+# train and test accuracy
+predTrn=predict(rpModel1B, PRchiTrn, type='class')
+table(pred = predTrn, true=PRchiTrn$pass)
+mean(predTrn == PRchiTrn$pass)
+table(pred = predict(rpModel1B, PRchiTstB, type='class'), true=PRchiTstB$pass)
+mean(predict(rpModel1B, PRchiTstB, type='class') == PRchiTstB$pass)
+
+############################### Balanced model 2 ###################
+##################### model 2 ############################ RZ score y or no
+#test/train split--- 334 rows- is this enough?
+TRG_PCT=0.75
+nr=nrow(chidataredBOTH)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+redchiTrn=chidataredBOTH[trnIndex,]   #training data with the randomly selected row-indices
+redchiTstB19 = chidataredBOTH[-trnIndex, ]
+
+m2subset= select(redchiTrn, -c("home_team", "away_team", "sp", "game_date", "posteam_type", "no_score_prob"
+                               ,"special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "ydsnet", 
+                               "yardline_100","play_type","pass","rush" ,"drive_inside20", "goal_to_go"))
+
+
+rpModel2B19=rpart(drive_ended_with_score ~ ., data=m2subset, method= "class", 
+               parms = list(split = "information"), 
+               control = rpart.control(minsplit = 30), na.action=na.omit)
+
+# plotting the tree
+rpModel2B19$variable.importance
+rpart.plot::prp(rpModel2B19, type=2, extra=100)
+
+# train and test accuracy??
+predTrn=predict(rpModel2B19, redchiTrn, type='class')
+table(pred = predTrn, true=redchiTrn$drive_ended_with_score)
+mean(predTrn == redchiTrn$drive_ended_with_score)
+table(pred = predict(rpModel2B19, redchiTstB19, type='class'), true=redchiTstB19$drive_ended_with_score)
+mean(predict(rpModel2B19, redchiTstB19, type='class') == redchiTstB19$drive_ended_with_score)
+
+##################### 2018 ############################ RZ score y or no
+#test/train split
+TRG_PCT=0.75
+nr=nrow(chidataredBOTH2)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+redchiTrn=chidataredBOTH2[trnIndex,]   #training data with the randomly selected row-indices
+redchiTstB18 = chidataredBOTH2[-trnIndex, ]
+
+m2subset= select(redchiTrn, -c("home_team", "away_team", "sp", "game_date", "posteam_type", "no_score_prob"
+                               ,"special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "ydsnet", 
+                               "yardline_100","play_type","pass","rush" ,"drive_inside20", "goal_to_go"))
+
+
+rpModel2B18=rpart(drive_ended_with_score ~ ., data=m2subset, method= "class", 
+               parms = list(split = "information"), 
+               control = rpart.control(minsplit = 30), na.action=na.omit)
+
+# plotting the tree
+rpModel2B18$variable.importance
+rpart.plot::prp(rpModel2B18, type=2, extra=100)
+
+# train and test accuracy??
+predTrn=predict(rpModel2B18, redchiTrn, type='class')
+table(pred = predTrn, true=redchiTrn$drive_ended_with_score)
+mean(predTrn == redchiTrn$drive_ended_with_score)
+table(pred = predict(rpModel2B18, redchiTstB18, type='class'), true=redchiTstB18$drive_ended_with_score)
+mean(predict(rpModel2B18, redchiTstB18, type='class') == redchiTstB18$drive_ended_with_score)
+
+##################### COMBINED DF model 2 ############################ RZ score y or no
+TRG_PCT=0.75
+nr=nrow(chidataredB_COM)
+trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
+
+redchiTrn=chidataredB_COM[trnIndex,]   #training data with the randomly selected row-indices
+redchiTstB = chidataredB_COM[-trnIndex, ]
+
+m2subset= select(redchiTrn, -c("home_team", "away_team", "sp", "game_date", "posteam_type", "no_score_prob"
+                               ,"special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
+                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "ydsnet", 
+                               "yardline_100","play_type","pass","rush" ,"drive_inside20", "goal_to_go"))
+
+
+rpModel2B=rpart(drive_ended_with_score ~ ., data=m2subset, method= "class", 
+               parms = list(split = "information"), 
+               control = rpart.control(minsplit = 30), na.action=na.omit)
+
+# plotting the tree
+rpModel2B$variable.importance
+rpart.plot::prp(rpModel2B, type=2, extra=100)
+
+# train and test accuracy??
+predTrn=predict(rpModel2B, redchiTrn, type='class')
+table(pred = predTrn, true=redchiTrn$drive_ended_with_score)
+mean(predTrn == redchiTrn$drive_ended_with_score)
+table(pred = predict(rpModel2B, redchiTst, type='class'), true=redchiTst$drive_ended_with_score)
+mean(predict(rpModel2B, redchiTst, type='class') == redchiTst$drive_ended_with_score)
+
 
 
 #####################3 making PR curves all on one plot #######
