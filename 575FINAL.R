@@ -999,7 +999,29 @@ mean(predTrn == redchiTrn$drive_ended_with_score)
 table(pred = predict(rpModel2B, redchiTst, type='class'), true=redchiTst$drive_ended_with_score)
 mean(predict(rpModel2B, redchiTst, type='class') == redchiTst$drive_ended_with_score)
 
+############################### PCA variable anaysis ##########
+n <- m2subset %>% select("week", "quarter_seconds_remaining", "game_seconds_remaining", "half_seconds_remaining",
+                         "ydstogo", "score_differential", "series", "temp", "wind")
 
+res.pca <- prcomp(n, scale = TRUE)
+
+fviz_pca_var(res.pca,
+             col.var = "contrib", # Color by contributions to the PC
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE     # Avoid text overlapping
+)
+
+
+m <- m1subset %>% select("week", "quarter_seconds_remaining", "game_seconds_remaining", "half_seconds_remaining",
+                          "ydstogo", "score_differential", "series", "temp", "wind", "yardline_100")
+
+res.pca <- prcomp(m, scale = TRUE)
+
+fviz_pca_var(res.pca,
+             col.var = "contrib", # Color by contributions to the PC
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE     # Avoid text overlapping
+)
 
 #####################3 making PR curves all on one plot #######
 score <- predict(rpModel19, PRchiTst19)
@@ -1014,16 +1036,82 @@ score <- predict(rpModel1, PRchiTst)
 score1<-score[,2]
 pred3 <- prediction(score1, PRchiTst$pass)
 
+score <- predict(rpModelB19, PRchiTstB19)
+score1<-score[,2]
+pred4 <- prediction(score1, PRchiTstB19$pass)
+
+score <- predict(rpModelB18, PRchiTstB18)
+score1<-score[,2]
+pred5 <- prediction(score1, PRchiTstB18$pass)
+
+score <- predict(rpModel1B, PRchiTstB)
+score1<-score[,2]
+pred6 <- prediction(score1, PRchiTstB$pass)
+
+
 perf <- performance(pred, "prec", "rec")
 perf2 <- performance(pred2, "prec", "rec")
 perf3 <- performance(pred3, "prec", "rec")
 
 
-plot(perf, main="PR model", col = "black", ylim=c(0,1))
+perf4 <- performance(pred4, "prec", "rec")
+perf5 <- performance(pred5, "prec", "rec")
+perf6 <- performance(pred6, "prec", "rec")
+
+
+plot(perf, main="PR model", col = "purple", ylim=c(0,1), xlim=c(0,1))
 plot(perf2, add = TRUE, col = "red")
 plot(perf3, add = TRUE, col = "green")
-legend(0.4, .51, legend=c("2019", "2018", "Combined"),
-       col=c("black","red", "green"), lty=1:2, cex=0.8)
+
+plot(perf4,  add = TRUE, col = "black")
+plot(perf5, add = TRUE, col = "blue")
+plot(perf6, add = TRUE, col = "orange")
+legend(0.65, 0.35, legend=c("2019", "2018", "Combined","2019 Bal", "2018 Bal", "Combined Bal"),
+       col=c("purple","red", "green","black","blue", "orange"), lty=1:2, cex=0.8)
+
+########### now for redzone #########
+score <- predict(rpModel218, redchiTst18)
+score1<-score[,2]
+pred <- prediction(score1, redchiTst18$drive_ended_with_score)
+score <- predict(rpModel219, redchiTst19)
+score1<-score[,2]
+pred2 <- prediction(score1, redchiTst19$drive_ended_with_score)
+score <- predict(rpModel2, redchiTst)
+score1<-score[,2]
+pred3 <- prediction(score1, redchiTst$drive_ended_with_score)
+
+score <- predict(rpModel2B19, redchiTstB19)
+score1<-score[,2]
+pred4 <- prediction(score1, redchiTstB19$drive_ended_with_score)
+
+score <- predict(rpModel2B18, redchiTstB18)
+score1<-score[,2]
+pred5 <- prediction(score1, redchiTstB18$drive_ended_with_score)
+
+score <- predict(rpModel2B, redchiTstB)
+score1<-score[,2]
+pred6 <- prediction(score1, redchiTstB$drive_ended_with_score)
+
+
+perf <- performance(pred, "prec", "rec")
+perf2 <- performance(pred2, "prec", "rec")
+perf3 <- performance(pred3, "prec", "rec")
+
+perf4 <- performance(pred4, "prec", "rec")
+perf5 <- performance(pred5, "prec", "rec")
+perf6 <- performance(pred6, "prec", "rec")
+
+plot(perf, main="Redzone model", col = "purple", ylim=c(0,1), xlim=c(0,1))
+plot(perf2, add = TRUE, col = "red")
+plot(perf3, add = TRUE, col = "green")
+
+plot(perf4,  add = TRUE, col = "black")
+plot(perf5, add = TRUE, col = "blue")
+plot(perf6, add = TRUE, col = "orange")
+legend(0.05, 0.85, legend=c("2019", "2018", "Combined","2019 Bal", "2018 Bal", "Combined Bal"),
+       col=c("purple","red", "green","black","blue", "orange"), lty=1:2, cex=0.8)
+
+
 
 #######GLM Model 1 Combined Balanced
 TRG_PCT=0.7
