@@ -276,39 +276,6 @@ pred_class <- as.factor(ifelse(pred >= 0.5, "1", "0"))
 library(caret)
 confusionMatrix(pred_class, PRchiTst$pass)
 
-##################### model 2 ############################ RZ score y or no
-#test/train split--- 488 rows- is this enough?
-TRG_PCT=0.75
-nr=nrow(chidataRED)
-trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
-
-redchiTrn=chidataRED[trnIndex,]   #training data with the randomly selected row-indices
-redchiTst = chidataRED[-trnIndex, ]
-
-m2subset= select(redchiTrn, -c("home_team", "away_team", "sp", "game_date", "posteam_type", "no_score_prob"
-                               ,"special", "punt_attempt", "pass_touchdown", "rush_touchdown", "posteam", "defteam",
-                               "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "ydsnet", 
-                                "yardline_100","play_type","pass","rush" ,"drive_inside20", "goal_to_go"))
-
-
-
-rpModel2=rpart(drive_ended_with_score ~ ., data=m2subset, method= "class", 
-               parms = list(split = "information"), 
-               control = rpart.control(minsplit = 30), na.action=na.omit)
-
-
-
-# plotting the tree
-rpModel2$variable.importance
-rpart.plot::prp(rpModel2, type=2, extra=100)
-
-# train and test accuracy??
-predTrn=predict(rpModel2, redchiTrn, type='class')
-table(pred = predTrn, true=redchiTrn$drive_ended_with_score)
-mean(predTrn == redchiTrn$drive_ended_with_score)
-table(pred = predict(rpModel2, redchiTst, type='class'), true=redchiTst$drive_ended_with_score)
-mean(predict(rpModel2, redchiTst, type='class') == redchiTst$drive_ended_with_score)
-
 
 #GLM For Model 2
 summary(m2subset)
