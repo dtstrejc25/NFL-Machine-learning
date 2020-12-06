@@ -212,6 +212,8 @@ ggplot(chidata, aes(y = game_date)) +
 ggplot(chidata[!is.na(chidata$play_type),], aes( x = play_type)) + geom_bar(fill="lightblue") + 
   labs(title = "Play Types for Chicago Bears 2019") + theme_bw()
 
+ggplot(chidata2[!is.na(chidata2$play_type),], aes( x = play_type)) + geom_bar(fill="orange") + 
+  labs(title = "Play Types for Chicago Bears 2018") + theme_bw()
 
 ggplot(chidata, aes(x = game_date)) + geom_bar(fill="lightblue", ) + 
   labs(title = "Chicago Bears- Plays per game") + theme_bw() #+
