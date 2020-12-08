@@ -292,7 +292,7 @@ null_model2 <- glm(drive_ended_with_score ~ 1, data = m2subset, family = "binomi
 summary(null_model2)
 step(null_model2, scope = list(lower = null_model2, upper = full_model2), direction = "both")
 
-#mod2_glm <- glm(pass ~ down + ydstogo + no_huddle + half_seconds_remaining, family = "binomial", data = m1subset) #Not optimal and error with step
+mod2_glm <- glm(pass ~ down + ydstogo + no_huddle + half_seconds_remaining, family = "binomial", data = m1subset) #Not optimal and error with step
 
 #Test Accuracy 
 pred2 <- predict(mod2_glm, newdata = redchiTst)
