@@ -1670,7 +1670,7 @@ levels(pred_class2)
 levels(redchiTst$drive_ended_with_score)
 
 
-########### Model 1 PR Plot ###################
+########### Model 1 GLM PR Plot ###################
 plot(pred_1_pr)
 plot(pred_2_pr)
 plot(pred_3_pr)
@@ -1684,7 +1684,7 @@ plot(pred_6_pr, add = TRUE, col = "purple")
 legend(x = "bottomright", col = c("black","red", "green", "blue", "orange", "purple"), lty = 1, lwd = 1,
        legend = c("2018", "2019", "Combined", "Bal 2018", "Bal 2019", "Bal Combined"))
 
-############Model 2 PR Plot #############
+############Model 2 GLM PR Plot #############
 plot.new()
 plot(pred_7_pr, main="PR model2", col = "black", ylim=c(0,1), xlim = c(0,1))
 plot(pred_8_pr, add = TRUE, col = "red", ylim=c(0,1))
