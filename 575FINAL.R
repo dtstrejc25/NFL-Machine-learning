@@ -4,9 +4,9 @@ library(rpart)
 library(rpart.plot)
 library(e1071)
 library(tidyverse)
-
+# import data
 #filter out the rows to only have those that include the bears
-# import it however you do sorry that's not included here
+
 pdata <- Play_By_Play_2019_Proposal
 
 v2rm <- c("play_id","game_id","old_game_id","season_type","game_half","quarter_end", "drive" , "time", "desc","qb_dropback","qb_kneel","qb_spike","qb_scramble",
@@ -46,6 +46,7 @@ v2rm <- c("play_id","game_id","old_game_id","season_type","game_half","quarter_e
           ,"stadium_id","success","play", "play_type_nfl", "side_of_field", "drive_start_yard_line", "drive_end_yard_line", "end_yard_line", "rush_attempt", "pass_attempt",
           "special_teams_play", "penalty_player_name","home_coach","away_coach","passer","rusher","receiver", "yrdln", "cp", "cpoe", "fg_prob", "time_of_day", "field_goal_result", "yards_gained", "series_success")
 
+########### Creating data 
 pdata2 <- Play_By_Play_2018 %>% select(-v2rm)
 m <- c("fixed_drive", "fixed_drive_result", "passer_jersey_number", "passer_jersey_number", "jersey_number",
        "rusher_jersey_number", "receiver_jersey_number", "series_result")
@@ -66,7 +67,7 @@ pdata2<- pdata2 %>% replace_na(list(wind=0, na.rm=TRUE))
 pdata <- pdata %>% select(-v2rm) 
 
 # model 1 - pass or run
-#model 2 - redzone score or not
+# model 2 - redzone score or not
 
 
 pdata <- pdata %>% filter(posteam !="NA")
@@ -144,54 +145,54 @@ pdata2 <- pdata2 %>% select(-start_group2)
 pdataCOMB <- rbind(pdata, pdata2)
 
 
-# make chicago df
+#Creating Chicago dataframe
 chidata <- pdata[grep("CHI", pdata$posteam), ]
 head(chidata)
 
-#for outcome 2--- make new df w just that in the redzone
+#For outcome 2--- New dataframe with Redzone
 chid <- which(chidata$drive_inside20==1)
 chidataRED <- chidata[chid, ]
 chidataRED$drive_ended_with_score <- na.omit(chidataRED$drive_ended_with_score)
 chidataRED <- chidataRED %>% filter(drive_ended_with_score !="NA") %>% droplevels()
 summary(chidataRED$drive_ended_with_score)  #label imbalance
 
-# using the combined df for chicago data
+# Created the combined (2018 & 2019) df for chicago data
 # make chicago df
 chidataCOMB <- pdataCOMB[grep("CHI", pdataCOMB$posteam), ]
 dim(chidataCOMB)  #2701 rows
 
-## PR chi data
+## Pass and Rush Chicago data
 Pchidata <- chidataCOMB[grep("pass", chidataCOMB$play_type), ]
 Rchidata <- chidataCOMB[grep("run", chidataCOMB$play_type), ]
 PRchidataCOMB <- rbind(Pchidata, Rchidata)
 dim(PRchidataCOMB) #2705
 
-#for outcome 2--- make new df w just that in the redzone
+#Outcome 2- Combined Chicago df with redzone
 chid <- which(chidataCOMB$drive_inside20==1)
 chidataREDCOMB <- chidataCOMB[chid, ]
 chidataREDCOMB$drive_ended_with_score <- na.omit(chidataREDCOMB$drive_ended_with_score)
 dim(chidataREDCOMB)  #1035
 
 
-################## 2018 datasets ############
+################## 2018 datasets ###############
 # using the combined df for chicago data
 # make chicago df
 chidata2 <- pdata2[grep("CHI", pdata2$posteam), ]
 dim(chidata2)  #1267 rows
 
-## PR chi data
+## Pass and Rush Chicago data
 Pchidata <- chidata2[grep("pass", chidata2$play_type), ]
 Rchidata <- chidata2[grep("run", chidata2$play_type), ]
 PRchidata2 <- rbind(Pchidata, Rchidata)
 dim(PRchidata2) #1057
 
-#for outcome 2--- make new df w just that in the redzone
+#Outcome 2-Chicago Data with redzone
 chid <- which(chidata2$drive_inside20==1)
 chidataRED2 <- chidata2[chid, ]
 chidataRED2 <- chidataRED2 %>% filter(drive_ended_with_score !="NA") %>% droplevels()
 summary(chidataRED2$drive_ended_with_score)  #490
 
-####### division data for 2019-- make the other 2 if you want 
+####### Division Data for 2019 ###########
 gbdata <- pdata[grep("GB", pdata$posteam), ]
 head(gbdata)
 
@@ -204,7 +205,7 @@ head(mndata)
 divdata <- rbind(gbdata, dtdata, mndata, chidata)
 dim(divdata) 
 
-# in game prop of pass to rush- can change to play type so it says which is which---------------
+# Plots for Pass and Rush for Chicago 
 ggplot(chidata, aes(y = game_date)) +
   geom_bar(aes(fill = pass), position = position_stack(reverse = TRUE)) + coord_flip() +
   labs(title = "Proportion of rush to pass Chicago Bears 2019 Season") + theme_bw()
@@ -258,7 +259,7 @@ PRchidata <- rbind(Pchidata, Rchidata)
 dim(PRchidata)
 
 
-#GLM for Model 1, rush or pass
+#GLM for Model 1, 2019 Pass or Rush
 summary(m1subset)
 m1subset$time_of_day <- as.factor(m1subset$time_of_day)
 mod1_play_type <- glm(pass ~ week + yardline_100 + game_date + quarter_seconds_remaining + half_seconds_remaining + game_seconds_remaining +
@@ -279,7 +280,7 @@ library(caret)
 confusionMatrix(pred_class, PRchiTst$pass)
 
 
-#GLM For Model 2
+#GLM For Model 2 2019 - Redzone
 summary(m2subset)
 str(m2subset$drive_ended_with_score)
 mod2_play_type <- glm(drive_ended_with_score ~ week + posteam_type + yardline_100 + game_date + quarter_seconds_remaining + half_seconds_remaining +
@@ -300,9 +301,8 @@ library(caret)
 confusionMatrix(pred_class2, redchiTst$drive_ended_with_score)
 
 
-
-##### address the label imbalance
-#now for the drive end w score
+##### Label imbalance for both subsets
+#drive end w score
 library(ROSE)
 chidataredBOTH <- ovun.sample(drive_ended_with_score ~ ., data = chidataRED, method = "both")$data
 table(chidataredBOTH$drive_ended_with_score)
@@ -311,7 +311,7 @@ table(chidataredBOTH$drive_ended_with_score)
 PRchidataBOTH <- ovun.sample(pass ~ ., data = PRchidata, method = "both")$data
 table(PRchidataBOTH$pass)
 
-########## now for the combined years #########
+########## combined years balance #########
 chidataredB_COM <- ovun.sample(drive_ended_with_score ~ ., data = chidataREDCOMB, method = "both")$data
 table(chidataredB_COM$drive_ended_with_score)
 
@@ -319,7 +319,7 @@ table(chidataredB_COM$drive_ended_with_score)
 PRchidataB_COM <- ovun.sample(pass ~ ., data = PRchidataCOMB, method = "both")$data
 table(PRchidataB_COM$pass)
 
-######### then for 2018
+######### Balance for 2018
 
 chidataredBOTH2 <- ovun.sample(drive_ended_with_score ~ ., data = chidataRED2, method = "both")$data
 table(chidataredBOTH2$drive_ended_with_score)
@@ -331,7 +331,7 @@ table(PRchidataBOTH2$pass)
 
 ######################### ALL THE SVM MODELS ARE TOGETHER ##########
 ###################### REDZONE 2019 ########################################
-#test/train split--- 368 rows- is this enough?
+
 TRG_PCT=0.75
 nr=nrow(chidataRED)
 trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
@@ -356,7 +356,7 @@ svm_tune$performances
 svm_tune$best.parameters
 svm_tune$best.model
 
-#using the best--- what is the output
+#Using the best svm- what is the output
 pp<-predict(svm_tune$best.model, redchiTrn)
 table(actual= redchiTrn$drive_ended_with_score, predicted= pp)
 
@@ -393,7 +393,7 @@ svm_tune$performances
 svm_tune$best.parameters
 svm_tune$best.model
 
-#using the best--- what is the output
+#Using the best svm- what is the output
 pp<-predict(svm_tune$best.model, redchiTrn)
 table(actual= redchiTrn$drive_ended_with_score, predicted= pp)
 
@@ -431,7 +431,7 @@ svm_tune$performances
 svm_tune$best.parameters
 svm_tune$best.model
 
-#using the best--- what is the output
+#Using the best svm--- what is the output
 pp<-predict(svm_tune$best.model, redchiTrn)
 table(actual= redchiTrn$drive_ended_with_score, predicted= pp)
 
@@ -485,7 +485,7 @@ pred6 <- prediction(as.numeric(revDTM_predTst_svm_best), as.numeric(PRchiTst$pas
 p<-performance(pred6, "auc")
 p@y.values
 
-##############  combined DF model 1 ############
+##############  Combined DF model 1 ############
 TRG_PCT=0.7
 nr=nrow(PRchidataCOMB)
 trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
@@ -493,9 +493,7 @@ trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
 PRchiTrn=PRchidataCOMB[trnIndex,]   #training data with the randomly selected row-indices
 PRchiTst = PRchidataCOMB[-trnIndex,]
 
-
-## model 1 ##
-#to include
+## model 1  subset for combined##
 m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "rush", "play_type",
                                "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
                                "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun",
@@ -514,7 +512,7 @@ svm_tune$performances
 svm_tune$best.parameters
 svm_tune$best.model
 
-#using the best--- what is the output
+#Using the best svm- what is the output
 pp<-predict(svm_tune$best.model, PRchiTrn)
 table(actual= PRchiTrn$pass, predicted= pp)
 
@@ -525,7 +523,7 @@ pred6 <- prediction(as.numeric(revDTM_predTst_svm_best), as.numeric(PRchiTst$pas
 p<-performance(pred6, "auc")
 p@y.values
 
-#################### 2018 ##########
+#################### 2018 svm ##########
 TRG_PCT=0.7
 nr=nrow(PRchidata2)
 trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
@@ -534,8 +532,7 @@ PRchiTrn=PRchidata2[trnIndex,]   #training data with the randomly selected row-i
 PRchiTst = PRchidata2[-trnIndex,]
 
 
-## model 1 ##
-#to include
+## model 1 subset##
 m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "rush", "play_type",
                                "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
                                "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun",
@@ -554,7 +551,7 @@ svm_tune$performances
 svm_tune$best.parameters
 svm_tune$best.model
 
-#using the best--- what is the output
+#Using the best svm--- what is the output
 pp<-predict(svm_tune$best.model, PRchiTrn)
 table(actual= PRchiTrn$pass, predicted= pp)
 
@@ -576,8 +573,7 @@ PRchiTrn=PRchidataBOTH2[trnIndex,]   #training data with the randomly selected r
 PRchiTst = PRchidataBOTH2[-trnIndex,]
 
 
-## model 1 ##
-#to include
+## model 1 subset##
 m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "rush", "play_type",
                                "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
                                "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun",
@@ -596,7 +592,7 @@ svm_tune$performances
 svm_tune$best.parameters
 svm_tune$best.model
 
-#using the best--- what is the output
+#Using the best svm-what is the output
 pp<-predict(svm_tune$best.model, PRchiTrn)
 table(actual= PRchiTrn$pass, predicted= pp)
 
@@ -616,8 +612,7 @@ PRchiTrn=PRchidataBOTH[trnIndex,]   #training data with the randomly selected ro
 PRchiTst = PRchidataBOTH[-trnIndex,]
 
 
-## model 1 ##
-#to include
+## model 1 subset##
 m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "rush", "play_type",
                                "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
                                "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun",
@@ -646,7 +641,7 @@ pred6 <- prediction(as.numeric(revDTM_predTst_svm_best), as.numeric(PRchiTst$pas
 p<-performance(pred6, "auc")
 p@y.values
 
-######################### combined #######################################
+######################### Combined DF #######################################
 TRG_PCT=0.7
 nr=nrow(PRchidataB_COM)
 trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
@@ -655,8 +650,7 @@ PRchiTrn=PRchidataB_COM[trnIndex,]   #training data with the randomly selected r
 PRchiTst = PRchidataB_COM[-trnIndex,]
 
 
-## model 1 ##
-#to include
+## model 1 subset##
 m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "rush", "play_type",
                                "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
                                "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun",
@@ -675,7 +669,7 @@ svm_tune$performances
 svm_tune$best.parameters
 svm_tune$best.model
 
-#using the best--- what is the output
+#Using the best svm--- what is the output
 pp<-predict(svm_tune$best.model, PRchiTrn)
 table(actual= PRchiTrn$pass, predicted= pp)
 
@@ -793,9 +787,6 @@ sapply(c(is.vector, is.matrix, is.list, is.data.frame), do.call, list(revDTM_pre
 pred6 <- prediction(as.numeric(revDTM_predTst_svm_best), as.numeric(redchiTst$drive_ended_with_score))
 p<-performance(pred6, "auc")
 p@y.values
-
-
-
 
 ################# GLM Model 1 with Combined Data ##############################
 #GLM for Model 1, rush or pass with combined data
@@ -927,8 +918,8 @@ confusionMatrix(pred_class, PRchiTst2$pass)
 
 #############################################################################
 ####################### RF MODELS #####################################
-##################### model 2 ############################ RZ score y or no
-#test/train split--- 356 rows- is this enough?
+##################### model 2 ############################ RedZone score Yes or No
+
 TRG_PCT=0.75
 nr=nrow(chidataRED)
 trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
@@ -950,16 +941,16 @@ rpModel219=rpart(drive_ended_with_score ~ ., data=m2subset, method= "class",
 rpModel219$variable.importance
 rpart.plot::prp(rpModel219, type=2, extra=100)
 
-# train and test accuracy??
+# train and test accuracy
 predTrn=predict(rpModel219, redchiTrn, type='class')
 table(pred = predTrn, true=redchiTrn$drive_ended_with_score)
 mean(predTrn == redchiTrn$drive_ended_with_score)
 table(pred = predict(rpModel219, redchiTst19, type='class'), true=redchiTst19$drive_ended_with_score)
 mean(predict(rpModel219, redchiTst19, type='class') == redchiTst19$drive_ended_with_score)
 
-##################### 2018 ############################ RZ score y or no
-##################### model 2 ############################ RZ score y or no
-#test/train split--- 356 rows- is this enough?
+##################### 2018 ############################ 
+##################### model 2 ############################ RedZone score Yes or No
+
 TRG_PCT=0.75
 nr=nrow(chidataRED2)
 trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
@@ -981,14 +972,14 @@ rpModel218=rpart(drive_ended_with_score ~ ., data=m2subset, method= "class",
 rpModel2$variable.importance
 rpart.plot::prp(rpModel218, type=2, extra=100)
 
-# train and test accuracy??
+# train and test accuracy
 predTrn=predict(rpModel218, redchiTrn, type='class')
 table(pred = predTrn, true=redchiTrn$drive_ended_with_score)
 mean(predTrn == redchiTrn$drive_ended_with_score)
 table(pred = predict(rpModel218, redchiTst18, type='class'), true=redchiTst18$drive_ended_with_score)
 mean(predict(rpModel218, redchiTst18, type='class') == redchiTst18$drive_ended_with_score)
 
-##################### COMBINED DF model 2 ############################ RZ score y or no
+##################### COMBINED DF model 2 ############################ RedZone score Yes or No
 TRG_PCT=0.75
 nr=nrow(chidataREDCOMB)
 trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
@@ -1012,7 +1003,7 @@ summary(m2subset$drive_ended_with_score)
 rpModel2$variable.importance
 rpart.plot::prp(rpModel2, type=2, extra=100)
 
-# train and test accuracy??
+# train and test accuracy
 predTrn=predict(rpModel2, redchiTrn, type='class')
 table(pred = predTrn, true=redchiTrn$drive_ended_with_score)
 mean(predTrn == redchiTrn$drive_ended_with_score)
@@ -1020,11 +1011,7 @@ table(pred = predict(rpModel2, redchiTst, type='class'), true=redchiTst$drive_en
 mean(predict(rpModel2, redchiTst, type='class') == redchiTst$drive_ended_with_score)
 
 
-
-
-
-
-##############################  MODEL 1 ##############
+##############################  2019 MODEL 1 RF ##############
 #test/train split
 TRG_PCT=0.7
 nr=nrow(PRchidata)
@@ -1034,8 +1021,7 @@ PRchiTrn=PRchidata[trnIndex,]   #training data with the randomly selected row-in
 PRchiTst19 = PRchidata[-trnIndex,]
 
 
-## model 1 ##
-#to include
+## model 1 subset##
 m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "rush", "play_type",
                                "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
                                "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun",
@@ -1045,7 +1031,7 @@ library(ranger)
 library(rpart)
 library(rpart.plot)
 
-# get the sheet and do the model with that
+# RPart Model
 rpModel19=rpart(pass ~ ., data=m1subset, method= "class", 
                parms = list(split = "information"), 
                control = rpart.control(minsplit = 30), na.action=na.omit)
@@ -1061,7 +1047,7 @@ mean(predTrn == PRchiTrn$pass)
 table(pred = predict(rpModel19, PRchiTst19, type='class'), true=PRchiTst19$pass)
 mean(predict(rpModel19, PRchiTst19, type='class') == PRchiTst19$pass)
 
-############################# 2018 ##########################
+############################# 2018 Model 1 RF ##########################
 #test/train split
 TRG_PCT=0.7
 nr=nrow(PRchidata2)
@@ -1082,7 +1068,7 @@ library(ranger)
 library(rpart)
 library(rpart.plot)
 
-# get the sheet and do the model with that
+# RF Model
 rpModel18=rpart(pass ~ ., data=m1subset, method= "class", 
                parms = list(split = "information"), 
                control = rpart.control(minsplit = 30), na.action=na.omit)
@@ -1098,7 +1084,7 @@ mean(predTrn == PRchiTrn$pass)
 table(pred = predict(rpModel18, PRchiTst18, type='class'), true=PRchiTst18$pass)
 mean(predict(rpModel18, PRchiTst18, type='class') == PRchiTst18$pass)
 
-############################# combined ###################
+############################# Combined Model 1 RF ###################
 #test/train split
 TRG_PCT=0.7
 nr=nrow(PRchidataCOMB)
@@ -1108,8 +1094,7 @@ PRchiTrn=PRchidataCOMB[trnIndex,]   #training data with the randomly selected ro
 PRchiTst = PRchidataCOMB[-trnIndex,]
 
 
-## model 1 ##
-#to include
+## model 1 subset##
 m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "rush", "play_type",
                                "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
                                "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun",
@@ -1119,7 +1104,7 @@ library(ranger)
 library(rpart)
 library(rpart.plot)
 
-# get the sheet and do the model with that
+# RF Model
 rpModel1=rpart(pass ~ ., data=m1subset, method= "class", 
                parms = list(split = "information"), 
                control = rpart.control(minsplit = 30), na.action=na.omit)
@@ -1138,7 +1123,7 @@ mean(predict(rpModel1, PRchiTst, type='class') == PRchiTst$pass)
 
 
 ########################### balancing the labels ###################
-##############################  MODEL 1 ##############
+##############################  MODEL 1 BALANCED 2019 RF ##############
 #test/train split
 TRG_PCT=0.7
 nr=nrow(PRchidataBOTH)
@@ -1148,15 +1133,14 @@ PRchiTrn=PRchidataBOTH[trnIndex,]   #training data with the randomly selected ro
 PRchiTstB19 = PRchidataBOTH[-trnIndex,]
 
 
-## model 1 ##
-#to include
+## model 1 subset##
 m1subset = select(PRchiTrn, -c("home_team", "away_team", "sp", "rush", "play_type",
                                "special","drive_ended_with_score", "punt_attempt", "pass_touchdown", "rush_touchdown",
                                "touchdown", "fourth_down_failed", "fourth_down_converted", "punt_blocked", "shotgun",
                                "defteam", "ydsnet", "no_score_prob"))
 
 
-# get the sheet and do the model with that
+#RF model
 rpModelB19=rpart(pass ~ ., data=m1subset, method= "class", 
                parms = list(split = "information"), 
                control = rpart.control(minsplit = 30), na.action=na.omit)
@@ -1172,7 +1156,7 @@ mean(predTrn == PRchiTrn$pass)
 table(pred = predict(rpModelB19, PRchiTstB19, type='class'), true=PRchiTstB19$pass)
 mean(predict(rpModelB19, PRchiTstB19, type='class') == PRchiTstB19$pass)
 
-############################# 2018 ##########################
+############################# 2018 Balanced Model 1 RF ##########################
 #test/train split
 TRG_PCT=0.7
 nr=nrow(PRchidataBOTH2)
@@ -1205,7 +1189,7 @@ mean(predTrn == PRchiTrn$pass)
 table(pred = predict(rpModelB18, PRchiTstB18, type='class'), true=PRchiTstB18$pass)
 mean(predict(rpModelB18, PRchiTstB18, type='class') == PRchiTstB18$pass)
 
-############################# combined ###################
+############################# Combined Balanced Model 1 RF ###################
 #test/train split
 TRG_PCT=0.7
 nr=nrow(PRchidataB_COM)
@@ -1239,8 +1223,7 @@ table(pred = predict(rpModel1B, PRchiTstB, type='class'), true=PRchiTstB$pass)
 mean(predict(rpModel1B, PRchiTstB, type='class') == PRchiTstB$pass)
 
 ############################### Balanced model 2 ###################
-##################### model 2 ############################ RZ score y or no
-#test/train split--- 334 rows- is this enough?
+##################### 2019 Balanced Model 2 RF ############################ RedZone score yes or no
 TRG_PCT=0.75
 nr=nrow(chidataredBOTH)
 trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
@@ -1262,14 +1245,14 @@ rpModel2B19=rpart(drive_ended_with_score ~ ., data=m2subset, method= "class",
 rpModel2B19$variable.importance
 rpart.plot::prp(rpModel2B19, type=2, extra=100)
 
-# train and test accuracy??
+# train and test accuracy 
 predTrn=predict(rpModel2B19, redchiTrn, type='class')
 table(pred = predTrn, true=redchiTrn$drive_ended_with_score)
 mean(predTrn == redchiTrn$drive_ended_with_score)
 table(pred = predict(rpModel2B19, redchiTstB19, type='class'), true=redchiTstB19$drive_ended_with_score)
 mean(predict(rpModel2B19, redchiTstB19, type='class') == redchiTstB19$drive_ended_with_score)
 
-##################### 2018 ############################ RZ score y or no
+##################### 2018 Balanced Model 2 RF ############################ RedZone score yes or no
 #test/train split
 TRG_PCT=0.75
 nr=nrow(chidataredBOTH2)
@@ -1292,14 +1275,14 @@ rpModel2B18=rpart(drive_ended_with_score ~ ., data=m2subset, method= "class",
 rpModel2B18$variable.importance
 rpart.plot::prp(rpModel2B18, type=2, extra=100)
 
-# train and test accuracy??
+# train and test accuracy
 predTrn=predict(rpModel2B18, redchiTrn, type='class')
 table(pred = predTrn, true=redchiTrn$drive_ended_with_score)
 mean(predTrn == redchiTrn$drive_ended_with_score)
 table(pred = predict(rpModel2B18, redchiTstB18, type='class'), true=redchiTstB18$drive_ended_with_score)
 mean(predict(rpModel2B18, redchiTstB18, type='class') == redchiTstB18$drive_ended_with_score)
 
-##################### COMBINED DF model 2 ############################ RZ score y or no
+##################### COMBINED Balanced DF Model 2 ############################ RedZone score yes or no
 TRG_PCT=0.75
 nr=nrow(chidataredB_COM)
 trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
@@ -1321,7 +1304,7 @@ rpModel2B=rpart(drive_ended_with_score ~ ., data=m2subset, method= "class",
 rpModel2B$variable.importance
 rpart.plot::prp(rpModel2B, type=2, extra=100)
 
-# train and test accuracy??
+# train and test accuracy
 predTrn=predict(rpModel2B, redchiTrn, type='class')
 table(pred = predTrn, true=redchiTrn$drive_ended_with_score)
 mean(predTrn == redchiTrn$drive_ended_with_score)
@@ -1352,7 +1335,7 @@ fviz_pca_var(res.pca,
              repel = TRUE     # Avoid text overlapping
 )
 
-#####################3 making PR curves all on one plot #######
+#####################3 making PR curves all on one plot ##########
 score <- predict(rpModel19, PRchiTst19)
 score1<-score[,2]
 pred <- prediction(score1, PRchiTst19$pass)
@@ -1442,7 +1425,7 @@ legend(0.05, 0.85, legend=c("2019", "2018", "Combined","2019 Bal", "2018 Bal", "
 
 
 
-#######GLM Model 1 Combined Balanced
+#######GLM Model 1 Combined Balanced######
 TRG_PCT=0.7
 nr=nrow(PRchidataB_COM)
 trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
@@ -1475,7 +1458,7 @@ confusionMatrix(pred_class, PRchiTst$pass)
 levels(pred_class)
 levels(PRchiTst$pass)
 
-#######GLM Combined Balance
+#######GLM Combined Balance#######
 TRG_PCT=0.7
 nr=nrow(PRchidataB_COM)
 trnIndex = sample(1:nr, size = round(TRG_PCT*nr), replace=FALSE)
@@ -1508,7 +1491,7 @@ confusionMatrix(pred_class, PRchiTst$pass)
 levels(pred_class)
 levels(PRchiTst$pass)
 
-########GLM Model 1 2019 Label Balance
+########GLM Model 1 2019 Label Balance#########
 PRchidataBOTH <- ovun.sample(pass ~ ., data = PRchidata, method = "both")$data
 table(PRchidataBOTH$pass)
 nr=nrow(PRchidataBOTH)
@@ -1685,3 +1668,30 @@ library(caret)
 confusionMatrix(pred_class2, redchiTst$drive_ended_with_score)
 levels(pred_class2)
 levels(redchiTst$drive_ended_with_score)
+
+
+########### Model 1 PR Plot ###################
+plot(pred_1_pr)
+plot(pred_2_pr)
+plot(pred_3_pr)
+
+plot(pred_1_pr, main="PR model1", col = "black", ylim=c(0,1))
+plot(pred_2_pr, add = TRUE, col = "red")
+plot(pred_3_pr, add = TRUE, col = "green")
+plot(pred_4_pr, add = TRUE, col = "blue")
+plot(pred_5_pr, add = TRUE, col = "orange")
+plot(pred_6_pr, add = TRUE, col = "purple")
+legend(x = "bottomright", col = c("black","red", "green", "blue", "orange", "purple"), lty = 1, lwd = 1,
+       legend = c("2018", "2019", "Combined", "Bal 2018", "Bal 2019", "Bal Combined"))
+
+############Model 2 PR Plot #############
+plot.new()
+plot(pred_7_pr, main="PR model2", col = "black", ylim=c(0,1), xlim = c(0,1))
+plot(pred_8_pr, add = TRUE, col = "red", ylim=c(0,1))
+plot(pred_9_pr, add = TRUE, col = "green", ylim=c(0,1))
+plot(pred_10_pr, add = TRUE, col = "blue", ylim=c(0,1))
+plot(pred_11_pr, add = TRUE, col = "orange", ylim=c(0,1))
+plot(pred_12_pr, add = TRUE, col = "purple", ylim=c(0,1))
+legend(x = "bottomright", col = c("black","red", "green", "blue", "orange", "purple"), lty = 1, lwd = 1,
+       legend = c("2018", "2019", "Combined", "Bal 2018", "Bal 2019", "Bal Combined"))
+
